@@ -1,61 +1,20 @@
 import Link from "next/link";
 
-const destinations = [
-  {
-    href: "/caregiver",
-    number: "01",
-    role: "FOR CAREGIVERS",
-    title: "Today's care brief",
-    description: "See personal context, recent care observations, and notes from the last visit.",
-    action: "Open care brief",
-    tone: "home-card-care",
-  },
-  {
-    href: "/memories",
-    number: "02",
-    role: "FOR NANCY",
-    title: "Nancy's memory book",
-    description: "Look through family memories and ask a simple question about a picture.",
-    action: "Open memory book",
-    tone: "home-card-senior",
-  },
-  {
-    href: "/family-memories",
-    number: "03",
-    role: "FOR FAMILY & CARE PARTNERS",
-    title: "Add or review memories",
-    description: "Share a photo and story, then confirm the details Nancy can revisit.",
-    action: "Manage memories",
-    tone: "home-card-family",
-  },
+const demos = [
+  { href: "/caregiver", icon: "↗", label: "CARE TEAM DEMO", title: "Caregiver workspace", text: "Review all six residents, open timelines and evidence, and leave a clear handoff for the next caregiver.", action: "Open care team dashboard", tone: "home-card-care" },
+  { href: "/memories", icon: "♡", label: "FAMILY DEMO · NANCY WILSON", title: "Nancy's MemoryLane", text: "Browse Nancy's simple memory book and ask a question about a family photo. Family members can add a verified memory too.", action: "Open Nancy's memory book", tone: "home-card-senior" },
 ];
 
 export default function Home() {
   return <main className="home-page">
-    <header className="home-header">
-      <Link className="brand" href="/">
-        <span className="brand-mark">ml</span>
-        <span><strong>MemoryLane</strong><small>MEMORIES & CARE</small></span>
-      </Link>
-      <span className="demo-pill">FICTIONAL DEMO</span>
-    </header>
-
-    <section className="home-hero">
-      <div className="home-eyebrow"><span className="status-dot"/> NANCY WILSON · DEMO PROFILE</div>
-      <h1>Care that remembers<br/><em>the whole person.</em></h1>
-      <p>Choose a space to continue. Each one is designed for a different part of Nancy&apos;s care.</p>
-    </section>
-
-    <section className="home-destinations" aria-label="Choose a MemoryLane space">
-      {destinations.map((item) => <Link className={`home-destination ${item.tone}`} href={item.href} key={item.href}>
-        <div className="home-destination-top"><span className="home-number">{item.number}</span><span className="home-arrow" aria-hidden="true">↗</span></div>
-        <div className="section-kicker">{item.role}</div>
-        <h2>{item.title}</h2>
-        <p>{item.description}</p>
-        <span className="home-action">{item.action} <b aria-hidden="true">→</b></span>
+    <header className="home-header"><Link className="brand" href="/"><span className="brand-mark">ml</span><span><strong>MemoryLane</strong><small>MEMORIES & CARE</small></span></Link><span className="demo-pill">FICTIONAL DEMO</span></header>
+    <section className="home-hero"><div className="home-eyebrow"><span className="status-dot"/> A PERSON-CENTERED CARE HANDOFF DEMO</div><h1>Care that remembers<br/><em>the whole person.</em></h1><p>Choose a demo to explore. Each one has a clear role and a different view of care.</p></section>
+    <section className="home-destinations home-destinations-two" aria-label="Choose a demo">
+      {demos.map((demo) => <Link className={`home-destination ${demo.tone}`} href={demo.href} key={demo.href}>
+        <div className="home-destination-top"><span className="home-number">{demo.label}</span><span className="home-arrow" aria-hidden="true">{demo.icon}</span></div>
+        <h2>{demo.title}</h2><p>{demo.text}</p><span className="home-action">{demo.action} <b aria-hidden="true">→</b></span>
       </Link>)}
     </section>
-
-    <footer className="home-footer"><span>MemoryLane prototype</span><span>For demonstration only · Not a clinical decision tool</span></footer>
+    <footer className="home-footer"><span>MemoryLane prototype</span><span>Fictional data only · Signals request human review; they are not diagnoses</span></footer>
   </main>;
 }

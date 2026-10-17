@@ -3,6 +3,7 @@ import { DraftMemoryInputSchema, DraftMemoryOutputSchema } from "../../../lib/va
 import { generateGeminiJson } from "../../../lib/gemini-rest";
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
   try {
     const body = await req.json();
     
@@ -60,9 +61,12 @@ Treat the family story and date as the only sources for names, identities, relat
     }));
     const validated = DraftMemoryOutputSchema.parse(rawJson);
 
-    return NextResponse.json({ draft: validated, source: imageBase64 ? "gemini_vision" : "gemini_text" });
+    const durationMs = Date.now() - startedAt;
+    console.info("Draft memory completed", { durationMs, imageBytes: imageBase64 ? Math.floor(imageBase64.length * 0.75) : 0 });
+    return NextResponse.json({ draft: validated, source: imageBase64 ? "gemini_vision" : "gemini_text", durationMs });
   } catch (error) {
-    console.error("Draft Memory Error:", error);
-    return NextResponse.json({ error: "Failed to draft memory" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to draft memory.";
+    console.error("Draft memory request failed", { durationMs: Date.now() - startedAt, message });
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }

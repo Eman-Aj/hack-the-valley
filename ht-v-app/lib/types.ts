@@ -7,7 +7,9 @@ export type VerificationStatus = "draft" | "verified";
 export type ObservationSourceRole =
   | "dietary_aide"
   | "care_aide"
-  | "overnight_staff";
+  | "overnight_staff"
+  | "care_partner"
+  | "nurse";
 
 export interface CareObservation {
   id: string;
@@ -17,6 +19,18 @@ export interface CareObservation {
   value: number;
   sourceRole: ObservationSourceRole;
   sourceNote: string;
+}
+
+export interface InteractionOutcome {
+  id: string;
+  residentId: string;
+  timestamp: string;
+  caregiverId: string;
+  actionRecorded: string;
+  observedResponse: string;
+  followUpRequired: boolean;
+  followUpNotes: string;
+  relatedMemoryId?: string;
 }
 
 export interface Resident {

@@ -11,7 +11,12 @@ export async function generateGeminiJson(parts: GeminiPart[], responseSchema: Ge
     headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     body: JSON.stringify({
       contents: [{ role: "user", parts }],
-      generationConfig: { responseMimeType: "application/json", responseSchema },
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema,
+        // These draft and care requests are simple; avoid Gemini's slower default reasoning depth.
+        thinkingConfig: { thinkingLevel: "low" },
+      },
     }),
   });
 

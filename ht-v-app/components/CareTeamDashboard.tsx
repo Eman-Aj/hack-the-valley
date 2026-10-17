@@ -1,0 +1,51 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { MOCK_RESIDENTS, MOCK_OBSERVATIONS } from "../lib/mock-db";
+import { evaluateHealthSignals } from "../lib/signal-engine";
+import { readCareObservations } from "../lib/care-demo-storage";
+import type { CareObservation, SignalStatus } from "../lib/types";
+
+const statusText: Record<SignalStatus, string> = {
+  needs_review: "Needs review", monitor: "Monitor", no_pattern_detected: "No pattern detected", insufficient_data: "Insufficient data",
+};
+
+export default function CareTeamDashboard() {
+  const [observations, setObservations] = useState<CareObservation[]>(MOCK_OBSERVATIONS);
+  useEffect(() => {
+    const refresh = () => setObservations(readCareObservations());
+    refresh(); window.addEventListener("memorylane:care-data-updated", refresh);
+    return () => window.removeEventListener("memorylane:care-data-updated", refresh);
+  }, []);
+  const summaries = useMemo(() => MOCK_RESIDENTS.map((resident) => ({ resident, signal: evaluateHealthSignals(resident, observations) })), [observations]);
+  const counts = {
+    needs_review: summaries.filter(({ signal }) => signal.overallStatus === "needs_review").length,
+    monitor: summaries.filter(({ signal }) => signal.overallStatus === "monitor").length,
+    insufficient: summaries.filter(({ signal }) => signal.overallStatus === "insufficient_data").length,
+  };
+
+  return <>
+    <div className="page-heading-row care-dashboard-heading"><div><div className="section-kicker">CARE TEAM OVERVIEW · OCTOBER 2026</div><h2>Care team dashboard</h2><p className="lead">A quick view of six fictional residents, based on recorded observations and the demo rules.</p></div><span className="tag tag-verified">DEMO DATA</span></div>
+    <section className="care-summary-grid" aria-label="Care signal summary">
+      <SummaryCard label="Residents" value={String(MOCK_RESIDENTS.length)} detail="In this demo" tone="blue"/>
+      <SummaryCard label="Needs review" value={String(counts.needs_review)} detail="Multiple sustained domain changes" tone="review"/>
+      <SummaryCard label="Monitor" value={String(counts.monitor)} detail="One domain has a sustained change" tone="monitor"/>
+      <SummaryCard label="Insufficient data" value={String(counts.insufficient)} detail="Missing observations are not normal" tone="quiet"/>
+    </section>
+    <div className="resident-list-heading"><div><div className="section-kicker">RESIDENTS</div><h3>Choose a resident</h3></div><span>Signals from deterministic demo rules</span></div>
+    <section className="care-resident-grid" aria-label="Residents">
+      {summaries.map(({ resident, signal }) => <Link className="panel care-resident-card" href={`/caregiver/resident/${resident.id}`} key={resident.id}>
+        <div className="care-resident-card-top"><span className="avatar care-resident-avatar">{resident.preferredName.slice(0, 1)}{resident.displayName.split(" ")[1]?.slice(0, 1)}</span><span className={`signal-status status-${signal.overallStatus}`}>{statusText[signal.overallStatus]}</span></div>
+        <h4>{resident.displayName}</h4><p>Prefers {resident.preferredName} · Fictional profile</p>
+        <div className="resident-domain-summary">{(["meal_intake", "mobility_assistance", "sleep_disruption"] as const).map((domain) => <span key={domain}><i className={`domain-dot domain-${domain}`}/>{domain === "meal_intake" ? "Meals" : domain === "mobility_assistance" ? "Mobility" : "Sleep"}<b>{statusText[signal.details[domain].status]}</b></span>)}</div>
+        <span className="care-resident-link">Open resident detail <b aria-hidden="true">→</b></span>
+      </Link>)}
+    </section>
+    <p className="care-rules-disclaimer">All observations and names are fictional. The configured rules only prompt a qualified person to review recorded changes; they do not diagnose or predict a condition.</p>
+  </>;
+}
+
+function SummaryCard({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: string }) {
+  return <article className={`panel care-summary-card summary-${tone}`}><span>{label}</span><strong>{value}</strong><small>{detail}</small></article>;
+}

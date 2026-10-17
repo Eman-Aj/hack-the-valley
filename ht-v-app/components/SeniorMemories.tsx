@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import type { MemoryEntry } from "../lib/types";
 import { readSavedMemories } from "../lib/memory-storage";
+import MemoryImageViewer from "./MemoryImageViewer";
 
 type Memory = {
   title: string;
@@ -43,6 +45,7 @@ const memories: Memory[] = [
 export default function SeniorMemories() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
   const [familyMemories, setFamilyMemories] = useState<Memory[]>([]);
+  const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const refresh = () => setFamilyMemories(readSavedMemories().filter((entry) => entry.verificationStatus === "verified" && entry.sharingPermissions.visibleInAskMyStory).map((entry) => ({
@@ -56,32 +59,68 @@ export default function SeniorMemories() {
   }, []);
   const allMemories = [...familyMemories, ...memories];
 
+  useEffect(() => {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-memory-index]"));
+    let frame = 0;
+    const updateFocus = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const viewportCenter = window.innerHeight / 2;
+        const travel = window.innerHeight * 1.35;
+        for (const card of cards) {
+          const bounds = card.getBoundingClientRect();
+          const cardCenter = bounds.top + bounds.height / 2;
+          const approach = Math.max(0, 1 - Math.abs(cardCenter - viewportCenter) / travel);
+          const progress = approach * approach * (3 - 2 * approach);
+          const visual = card.querySelector<HTMLElement>(".senior-memory-visual");
+          const ratio = Number(visual?.dataset.aspectRatio) || 1.45;
+          const maxHeight = Math.max(1, Math.min(window.innerHeight * 0.54, 580, card.clientWidth / ratio));
+          const minHeight = Math.min(270, maxHeight);
+          const imageHeight = minHeight + (maxHeight - minHeight) * progress;
+          const imageWidth = imageHeight * ratio;
+          card.style.setProperty("--memory-progress", progress.toFixed(3));
+          visual?.style.setProperty("height", `${Math.round(imageHeight)}px`);
+          visual?.style.setProperty("width", `${Math.round(imageWidth)}px`);
+          card.classList.toggle("is-centered", progress >= 0.62);
+        }
+      });
+    };
+    updateFocus();
+    window.addEventListener("scroll", updateFocus, { passive: true });
+    window.addEventListener("resize", updateFocus);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", updateFocus); window.removeEventListener("resize", updateFocus); };
+  }, [familyMemories, imageRatios]);
+
   return <section className={`senior-view ${activeMemory ? "has-active-memory" : ""}`}>
     {/* The senior view keeps one clear purpose: browse a memory or ask about it. */}
     <Link className="senior-exit-button" href="/">← Home</Link>
     <header className="senior-welcome">
       <div className="senior-welcome-icon" aria-hidden="true">♡</div>
       <div><div className="section-kicker">NANCY&apos;S MEMORY BOOK</div><h2>Hello, Nancy</h2><p>Choose a memory to look at. You can ask about any picture.</p></div>
+      <Link href="/ask-story" className="senior-ask-story-link">Ask My Story <span aria-hidden="true">→</span></Link>
     </header>
 
     <div className="senior-layout">
       <div className="senior-memory-list">
-        {allMemories.map((memory) => <article className={`senior-memory-card ${activeMemory?.title === memory.title ? "is-active" : ""}`} key={memory.id ?? memory.title}>
+        {allMemories.map((memory, index) => <article className={`senior-memory-card ${activeMemory?.title === memory.title ? "is-active" : ""}`} key={memory.id ?? memory.title} tabIndex={0} data-memory-index={index}>
           {/* A large picture placeholder leaves room for the real approved family photo. */}
-          {memory.image ? <img className="senior-memory-image senior-memory-upload" src={memory.image} alt={memory.title}/> : <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
-            <span className="senior-sun"/><span className="senior-hill senior-hill-one"/><span className="senior-hill senior-hill-two"/>
-            <span className="senior-photo-label">Family photo</span>
-          </div>}
+          <div className="senior-memory-visual" data-aspect-ratio={imageRatios[memory.id ?? memory.title] ?? 1.45} style={{ "--memory-ratio": imageRatios[memory.id ?? memory.title] ?? 1.45 } as CSSProperties}>
+            {memory.image ? <MemoryImageViewer src={memory.image} alt={memory.title} title={memory.title} imageClassName="senior-memory-image senior-memory-upload" variant="senior" onImageDimensions={(width, height) => { if (width && height) setImageRatios((current) => ({ ...current, [memory.id ?? memory.title]: width / height })); }}/> : <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
+              <span className="senior-sun"/><span className="senior-hill senior-hill-one"/><span className="senior-hill senior-hill-two"/>
+              <span className="senior-photo-label">Family photo</span>
+            </div>}
+            <div className="senior-memory-caption"><strong>{memory.title}</strong><span>{memory.date}</span></div>
+          </div>
           <div className="senior-memory-content">
             <div className="senior-memory-date">{memory.date}</div>
             <h3>{memory.title}</h3>
             <p>{memory.story}</p>
-            <button className="senior-ask-button" onClick={() => setActiveMemory(memory)}>
-              <span className="senior-ask-icon" aria-hidden="true">?</span>
-              Ask about this picture
-              <span className="senior-button-arrow" aria-hidden="true">›</span>
-            </button>
           </div>
+          <button className="senior-ask-button" onClick={() => setActiveMemory(memory)}>
+            <span className="senior-ask-icon" aria-hidden="true">?</span>
+            Ask about this picture
+            <span className="senior-button-arrow" aria-hidden="true">›</span>
+          </button>
         </article>)}
       </div>
 
@@ -89,6 +128,7 @@ export default function SeniorMemories() {
       {activeMemory && <MemoryQuestionPanel key={activeMemory.id ?? activeMemory.title} memory={activeMemory} onClose={() => setActiveMemory(null)} />}
     </div>
     <div className="senior-end-note"><span aria-hidden="true">♡</span> More memories are waiting below. Keep scrolling when you&apos;re ready.</div>
+    <div className="senior-family-link"><span>For Nancy&apos;s family</span><Link href="/family-memories">Add or review a memory →</Link></div>
   </section>;
 }
 

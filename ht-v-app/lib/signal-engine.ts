@@ -8,12 +8,12 @@ import type {
 // Re-export CareObservation so any existing imports don't break
 export type { CareObservation };
 
-const RECENT_WINDOW_DATES = ["2026-10-14", "2026-10-15", "2026-10-16"];
 const MIN_OBSERVATIONS_IN_WINDOW = 2;
 
 export interface DomainEvaluation {
   status: SignalStatus;
   recentValues: number[];
+  observations: CareObservation[];
   baselineValue: number;
   explanation: string;
 }
@@ -57,6 +57,7 @@ function evaluateDomain(
     return {
       status: "insufficient_data",
       recentValues,
+      observations: recentObs,
       baselineValue: baseline,
       explanation: `Only ${recentObs.length} observation(s) recorded in the recent 3-day window; insufficient evidence to assess pattern.`,
     };
@@ -71,6 +72,7 @@ function evaluateDomain(
     return {
       status: "needs_review",
       recentValues,
+      observations: recentObs,
       baselineValue: baseline,
       explanation: `Sustained change from baseline (${baseline}) across ${concerningCount} of the last ${recentObs.length} days (${recentValues.join(", ")}).`,
     };
@@ -79,6 +81,7 @@ function evaluateDomain(
   return {
     status: "no_pattern_detected",
     recentValues,
+    observations: recentObs,
     baselineValue: baseline,
     explanation: `Recent 3-day observations (${recentValues.join(", ")}) remain near baseline (${baseline}).`,
   };
@@ -88,10 +91,14 @@ export function evaluateHealthSignals(
   resident: Resident,
   allObservations: CareObservation[]
 ): HealthSignalSummary {
-  const residentRecentObs = allObservations.filter(
-    (o) =>
-      o.residentId === resident.id && RECENT_WINDOW_DATES.includes(o.date)
-  );
+  const residentObservations = allObservations.filter((o) => o.residentId === resident.id);
+  const latestDate = residentObservations.map((o) => o.date).sort((a, b) => b.localeCompare(a))[0];
+  const windowDates = latestDate ? Array.from({ length: 3 }, (_, index) => {
+    const day = new Date(`${latestDate}T00:00:00Z`);
+    day.setUTCDate(day.getUTCDate() - (2 - index));
+    return day.toISOString().slice(0, 10);
+  }) : [];
+  const residentRecentObs = residentObservations.filter((o) => windowDates.includes(o.date));
 
   const domains: ObservationType[] = [
     "meal_intake",
@@ -128,7 +135,7 @@ export function evaluateHealthSignals(
   return {
     residentId: resident.id,
     overallStatus,
-    windowDates: RECENT_WINDOW_DATES,
+    windowDates,
     meal_intake:
       flaggedDomains === 1 && details.meal_intake.status === "needs_review"
         ? "monitor"

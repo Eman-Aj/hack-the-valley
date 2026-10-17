@@ -4,6 +4,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import type { DraftMemoryOutput } from "../lib/validation";
 import type { MemoryEntry } from "../lib/types";
 import { readSavedMemories, saveMemory } from "../lib/memory-storage";
+import MemoryImageViewer from "./MemoryImageViewer";
 
 const samples = [
   { title: "The day Nancy met Theo", date: "June 14, 2024", status: "Verified", description: "A first meeting with her new grandson.", art: "memory-art" },
@@ -41,13 +42,13 @@ export default function FamilyMemories() {
     try {
       // Resize/re-encode before sending and saving so the demo stays comfortably within browser limits.
       const bitmap = await createImageBitmap(file);
-      const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+      const scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height));
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(bitmap.width * scale));
       canvas.height = Math.max(1, Math.round(bitmap.height * scale));
       canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
       bitmap.close();
-      const optimized = canvas.toDataURL("image/jpeg", 0.82);
+      const optimized = canvas.toDataURL("image/jpeg", 0.76);
       setImage(optimized); setFileName(file.name);
     } catch {
       setError("We couldn't open that photo. Please try another JPG, PNG, or WebP image.");
@@ -65,6 +66,7 @@ export default function FamilyMemories() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "We couldn't create a draft right now.");
       setDraft(data.draft); setSource(data.source ?? "AI draft");
+      if (typeof data.durationMs === "number") setNotice(`Draft ready in ${(data.durationMs / 1000).toFixed(1)} seconds. Please review every detail.`);
     } catch (err) {
       // Keep the flow usable without an AI key: the family can still write and verify a memory themselves.
       setDraft({ proposedCaption: story.trim(), suggestedEventDate: eventDate.trim(), people: [], locationOrContext: "", comfortingDetails: "", needsConfirmationNotes: ["AI drafting was unavailable. Please check every detail and add any helpful context before saving."] });
@@ -98,7 +100,7 @@ export default function FamilyMemories() {
   }
 
   return <>
-    <div className="page-heading-row"><div><div className="section-kicker">FAMILY & CARE PARTNER WORKSPACE</div><h2>Add and manage memories</h2><p className="lead">Share a story for Nancy to revisit. Review details before they appear in her memories.</p></div><button className="button button-primary" onClick={() => document.getElementById("memory-story")?.focus()}>＋ Add a memory</button></div>
+    <div className="page-heading-row"><div><div className="section-kicker">FAMILY & CARE PARTNER WORKSPACE</div><h2>Add and manage memories</h2><p className="lead">Share a story for Nancy to revisit. Review details before they appear in her memories.</p></div><button className="button button-primary memory-upload-cta" onClick={() => fileInput.current?.click()}>↑ Upload a photo</button></div>
     <section className="panel add-memory-panel">
       <div className="add-memory-intro"><div className="upload-icon">＋</div><div><h3>Add a family memory</h3><p>Share a photo and the story behind it. You&apos;ll review every detail before it becomes part of Nancy&apos;s story.</p></div></div>
       <div className="upload-drop" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file && fileInput.current) { const transfer = new DataTransfer(); transfer.items.add(file); fileInput.current.files = transfer.files; fileInput.current.dispatchEvent(new Event("change", { bubbles: true })); } }}>
@@ -124,5 +126,5 @@ export default function FamilyMemories() {
 }
 
 function MemoryCard({ title, date, status, art = "memory-art", description, image }: { title: string; date: string; status: string; art?: string; description: string; image?: string }) {
-  return <article className="panel memory-card">{image ? <img className="memory-card-photo" src={image} alt={title}/> : <div className={`memory-art card-art ${art}`} aria-hidden="true"><span className="sun"/><span className="hill hill-one"/><span className="hill hill-two"/></div>}<div className="memory-card-body"><div className="memory-card-meta"><span>{date}</span><span className={`tag tag-${status === "Verified" ? "verified" : "pending"}`}>{status === "Verified" ? "✓ " : "• "}{status}</span></div><h4>{title}</h4><p>{description}</p><div className="source-line"><span className="source-avatar">JW</span> Shared by Jordan, her son</div></div></article>;
+  return <article className="panel memory-card">{image ? <MemoryImageViewer src={image} alt={title} title={title} imageClassName="memory-card-photo"/> : <div className={`memory-art card-art ${art}`} aria-hidden="true"><span className="sun"/><span className="hill hill-one"/><span className="hill hill-two"/></div>}<div className="memory-card-body"><div className="memory-card-meta"><span>{date}</span><span className={`tag tag-${status === "Verified" ? "verified" : "pending"}`}>{status === "Verified" ? "✓ " : "• "}{status}</span></div><h4>{title}</h4><p>{description}</p><div className="source-line"><span className="source-avatar">JW</span> Shared by Jordan, her son</div></div></article>;
 }

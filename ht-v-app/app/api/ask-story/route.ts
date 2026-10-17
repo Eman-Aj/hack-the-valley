@@ -2,43 +2,33 @@ import { NextResponse } from "next/server";
 import { AskStoryInputSchema, AskStoryOutputSchema, AskStoryOutput } from "../../../lib/validation";
 import { generateGeminiJson } from "../../../lib/gemini-rest";
 
-// Offline fallback so the demo never breaks
-// Offline fallback so the demo never breaks
+// Offline fallback so the demo never breaks. It only repeats confirmed record fields.
 function buildDeterministicFallback(
   question: string,
   verifiedMemories: any[]
 ): AskStoryOutput {
   const q = question.toLowerCase();
-  const theoMemory = verifiedMemories.find(
-    (m: any) =>
-      m.familyStory.toLowerCase().includes("theo") ||
-      m.verifiedFacts.people.some((p: any) => p.name.toLowerCase().includes("theo"))
-  );
+  const words = q.split(/[^a-z0-9]+/).filter((word) => word.length > 2 && !["who", "what", "where", "when", "tell", "about", "this", "that", "with", "from", "family", "memory", "photo", "picture", "did", "does", "was", "are", "the", "and", "for"].includes(word));
+  const ranked = verifiedMemories.map((memory: any) => {
+    const text = [memory.proposedCaption, memory.familyStory, memory.verifiedFacts.locationOrContext, ...memory.verifiedFacts.people.map((person: any) => person.name), ...memory.verifiedFacts.people.map((person: any) => person.relationship)].join(" ").toLowerCase();
+    return { memory, score: words.reduce((score, word) => score + (text.includes(word) ? 1 : 0), 0) };
+  }).sort((a: any, b: any) => b.score - a.score);
+  const match = ranked[0]?.score > 0 && (ranked.length === 1 || ranked[0].score > ranked[1].score) ? ranked[0].memory : verifiedMemories.length === 1 && /picture|photo|memory|this/.test(q) ? verifiedMemories[0] : null;
 
-  if ((q.includes("baby") || q.includes("picture") || q.includes("theo") || q.includes("who")) && theoMemory) {
-    return {
-      answer: `That is your new grandson, Theo! Your family member (${theoMemory.contributorId}) shared this photo from the day you met him. ${theoMemory.verifiedFacts.comfortingDetails}`,
-      isSupported: true,
-      citedMemoryIds: [theoMemory.id],
-      gentleFollowUpPrompt: "Would you like to hear more about the day they brought Theo to visit?",
-    };
-  }
-
-  // For browser-demo memories, answer from the one memory explicitly in context.
-  // If the family record doesn't contain the requested detail, keep the safe unknown response below.
-  if (verifiedMemories.length === 1) {
-    const memory = verifiedMemories[0];
-    const facts = memory.verifiedFacts;
-    const people = facts.people.map((person: any) => `${person.name}${person.relationship ? `, ${person.relationship}` : ""}`);
-    if ((q.includes("who") || q.includes("person")) && people.length > 0) {
-      return { answer: `Your family confirmed that ${people.join(" and ")} ${people.length === 1 ? "is" : "are"} part of this memory. ${facts.comfortingDetails || memory.proposedCaption}`, isSupported: true, citedMemoryIds: [memory.id], gentleFollowUpPrompt: "Would you like to hear the family story about this picture?" };
+  if (match) {
+    const facts = match.verifiedFacts;
+    let answer: string | null = null;
+    if ((q.includes("who") || q.includes("person")) && facts.people.length) {
+      const people = facts.people.map((person: any) => `${person.name}${person.relationship ? `, ${person.relationship}` : ""}`);
+      answer = `Your family confirmed that ${people.join(" and ")} ${people.length === 1 ? "is" : "are"} part of this memory.`;
+    } else if (q.includes("where")) {
+      answer = facts.locationOrContext ? `Your family shared that this memory is connected with ${facts.locationOrContext}.` : null;
+    } else if (q.includes("when") || q.includes("date")) {
+      answer = facts.eventDate ? `Your family recorded this memory on ${facts.eventDate}.` : null;
+    } else {
+      answer = [facts.comfortingDetails, match.familyStory, match.proposedCaption].filter(Boolean).join(" ");
     }
-    if (q.includes("where") && facts.locationOrContext) {
-      return { answer: `Your family shared that this memory is connected with ${facts.locationOrContext}. ${facts.comfortingDetails}`, isSupported: true, citedMemoryIds: [memory.id], gentleFollowUpPrompt: "Would you like to hear more about this memory?" };
-    }
-    if ((q.includes("tell me") || q.includes("what") || q.includes("day") || q.includes("picture")) && (memory.familyStory || facts.comfortingDetails)) {
-      return { answer: `${facts.comfortingDetails || memory.proposedCaption} ${memory.familyStory}`.trim(), isSupported: true, citedMemoryIds: [memory.id], gentleFollowUpPrompt: "Would you like to ask about someone in this memory?" };
-    }
+    if (answer) return { answer, isSupported: true, citedMemoryIds: [match.id], gentleFollowUpPrompt: "Would you like to hear another detail from this family memory?" };
   }
 
   return {
