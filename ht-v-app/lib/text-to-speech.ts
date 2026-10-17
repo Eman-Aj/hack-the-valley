@@ -1,28 +1,65 @@
-export function speakText(text: string) {
+
+let currentAudio: HTMLAudioElement | null = null;
+let currentAudioUrl: string | null = null;
+let requestController: AbortController | null = null;
+
+export async function speakText(text: string): Promise<void> {
   if (typeof window === "undefined") return;
 
-  const voices = window.speechSynthesis.getVoices();
+  stopSpeaking();
 
-  const zira = voices.find(voice =>
-    voice.name.includes("Zira")
-  );
+  const controller = new AbortController();
+  requestController = controller;
 
-  const message = new SpeechSynthesisUtterance(text);
+  try {
+    const response = await fetch("/api/text-to-speech", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+      signal: controller.signal,
+    });
 
-  if (zira) {
-    message.voice = zira;
+    if (!response.ok) {
+      throw new Error("Failed to generate speech");
+    }
+
+    const audioBlob = await response.blob();
+
+    if (controller.signal.aborted) return;
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+
+    currentAudio = audio;
+    currentAudioUrl = audioUrl;
+
+    audio.onended = () => {
+      if (currentAudio === audio) stopSpeaking();
+    };
+
+    await audio.play();
+  } catch (error) {
+    if (!controller.signal.aborted) {
+      console.error("Gemini text-to-speech error:", error);
+      if (requestController === controller) stopSpeaking();
+    }
   }
-
-  message.rate = 0.85;
-  message.pitch = 1.0;
-  message.volume = 1.0;
-
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(message);
 }
 
-export function stopSpeaking() {
-  if (typeof window === "undefined") return;
+export function stopSpeaking(): void {
+  requestController?.abort();
+  requestController = null;
 
-  window.speechSynthesis.cancel();
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+
+  if (currentAudioUrl) {
+    URL.revokeObjectURL(currentAudioUrl);
+    currentAudioUrl = null;
+  }
 }
