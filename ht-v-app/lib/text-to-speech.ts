@@ -3,7 +3,9 @@ let currentAudio: HTMLAudioElement | null = null;
 let currentAudioUrl: string | null = null;
 let requestController: AbortController | null = null;
 
-export async function speakText(text: string): Promise<void> {
+export type SpeechPlaybackState = "playing" | "ended" | "error";
+
+export async function speakText(text: string, onStateChange?: (state: SpeechPlaybackState) => void): Promise<void> {
   if (typeof window === "undefined") return;
 
   stopSpeaking();
@@ -36,13 +38,16 @@ export async function speakText(text: string): Promise<void> {
     currentAudioUrl = audioUrl;
 
     audio.onended = () => {
+      onStateChange?.("ended");
       if (currentAudio === audio) stopSpeaking();
     };
 
     await audio.play();
+    onStateChange?.("playing");
   } catch (error) {
     if (!controller.signal.aborted) {
       console.error("Gemini text-to-speech error:", error);
+      onStateChange?.("error");
       if (requestController === controller) stopSpeaking();
     }
   }

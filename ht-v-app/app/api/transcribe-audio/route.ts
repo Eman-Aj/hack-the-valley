@@ -3,6 +3,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 // Deterministic fallback so the live voice demo never fails on stage
 function buildFallbackTranscript(context?: string): string {
+  // For a spoken question, never replace silence or microphone failure with invented words.
+  if (context === "memory_question") return "";
   if (context === "family_memory") {
     return "I brought baby Theo to visit Nancy today in the garden. She held him and smiled the whole time.";
   }

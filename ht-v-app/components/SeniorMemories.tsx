@@ -6,6 +6,8 @@ import Link from "next/link";
 import type { MemoryEntry } from "../lib/types";
 import { readSavedMemories } from "../lib/memory-storage";
 import MemoryImageViewer from "./MemoryImageViewer";
+import { speakText, stopSpeaking, type SpeechPlaybackState } from "../lib/text-to-speech";
+import VoiceRecorderButton from "./VoiceRecorderButton";
 
 type Memory = {
   title: string;
@@ -46,6 +48,8 @@ export default function SeniorMemories() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
   const [familyMemories, setFamilyMemories] = useState<Memory[]>([]);
   const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
+  const [speechMemoryId, setSpeechMemoryId] = useState<string | null>(null);
+  const [speechStatus, setSpeechStatus] = useState<"idle" | "loading" | SpeechPlaybackState>("idle");
 
   useEffect(() => {
     const refresh = () => setFamilyMemories(readSavedMemories().filter((entry) => entry.verificationStatus === "verified" && entry.sharingPermissions.visibleInAskMyStory).map((entry) => ({
@@ -91,6 +95,27 @@ export default function SeniorMemories() {
     return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", updateFocus); window.removeEventListener("resize", updateFocus); };
   }, [familyMemories, imageRatios]);
 
+  useEffect(() => () => stopSpeaking(), []);
+
+  function toggleMemorySpeech(memory: Memory) {
+    const memoryKey = memory.id ?? memory.title;
+    if (speechMemoryId === memoryKey && (speechStatus === "loading" || speechStatus === "playing")) {
+      stopSpeaking();
+      setSpeechMemoryId(null);
+      setSpeechStatus("idle");
+      return;
+    }
+
+    stopSpeaking();
+    setSpeechMemoryId(memoryKey);
+    setSpeechStatus("loading");
+    const narration = `${memory.title}. ${memory.date}. ${memory.story}`;
+    void speakText(narration, (status) => {
+      setSpeechStatus(status);
+      if (status === "ended") setSpeechMemoryId(null);
+    });
+  }
+
   return <section className={`senior-view ${activeMemory ? "has-active-memory" : ""}`}>
     {/* The senior view keeps one clear purpose: browse a memory or ask about it. */}
     <Link className="senior-exit-button" href="/">← Home</Link>
@@ -116,11 +141,16 @@ export default function SeniorMemories() {
             <h3>{memory.title}</h3>
             <p>{memory.story}</p>
           </div>
-          <button className="senior-ask-button" onClick={() => setActiveMemory(memory)}>
-            <span className="senior-ask-icon" aria-hidden="true">?</span>
-            Ask about this picture
-            <span className="senior-button-arrow" aria-hidden="true">›</span>
-          </button>
+          <div className="senior-memory-actions">
+            <button className="senior-ask-button" onClick={() => setActiveMemory(memory)}>
+              <span className="senior-ask-icon" aria-hidden="true">?</span>
+              Ask about this picture
+              <span className="senior-button-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" className={`senior-speak-button ${speechMemoryId === (memory.id ?? memory.title) && speechStatus === "playing" ? "is-playing" : ""} ${speechMemoryId === (memory.id ?? memory.title) && speechStatus === "error" ? "is-error" : ""}`} onClick={() => toggleMemorySpeech(memory)} aria-label={speechMemoryId === (memory.id ?? memory.title) && speechStatus === "loading" ? "Stop audio generation" : speechMemoryId === (memory.id ?? memory.title) && speechStatus === "playing" ? "Stop reading memory" : speechMemoryId === (memory.id ?? memory.title) && speechStatus === "error" ? "Speech unavailable. Try reading this memory again" : "Read this memory aloud"} title={speechStatus === "error" && speechMemoryId === (memory.id ?? memory.title) ? "Speech unavailable. Try again." : "Read this memory aloud"}>
+              {speechMemoryId === (memory.id ?? memory.title) && speechStatus === "loading" ? <span aria-hidden="true" className="senior-speak-loading">…</span> : speechMemoryId === (memory.id ?? memory.title) && speechStatus === "playing" ? <span aria-hidden="true">■</span> : <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M4 10v4h4l5 4V6l-5 4H4Z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>}
+            </button>
+          </div>
         </article>)}
       </div>
 
@@ -167,6 +197,10 @@ function MemoryQuestionPanel({ memory, onClose }: { memory: Memory; onClose: () 
     <div className="memory-chat-prompt">Try asking:</div>
     <div className="memory-chat-suggestions">
       {memory.questions.map((suggestion) => <button key={suggestion} onClick={() => askQuestion(suggestion)}>{suggestion}</button>)}
+    </div>
+    <div className="memory-chat-voice">
+      <VoiceRecorderButton context="memory_question" onTranscriptReady={(transcript) => { setQuestion(transcript); document.getElementById("memory-question")?.focus(); }}/>
+      <span>Speak a question, then review it before sending.</span>
     </div>
     {answer && <div className="memory-chat-exchange" aria-live="polite">
       <div className="memory-chat-question"><span>You asked</span><p>{question}</p></div>
