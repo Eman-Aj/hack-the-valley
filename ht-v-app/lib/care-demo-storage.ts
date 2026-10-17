@@ -1,8 +1,9 @@
-import type { CareObservation, InteractionOutcome } from "./types";
-import { MOCK_OBSERVATIONS } from "./mock-db";
+import type { CareObservation, InteractionOutcome, NursingNote } from "./types";
+import { MOCK_NURSING_NOTES, MOCK_OBSERVATIONS } from "./mock-db";
 
 const OBSERVATIONS_KEY = "memorylane.demo-observations.v1";
 const HANDOFFS_KEY = "memorylane.demo-handoffs.v1";
+const NURSING_NOTES_KEY = "memorylane.demo-nursing-notes.v1";
 
 function readList<T>(key: string): T[] {
   if (typeof window === "undefined") return [];
@@ -19,6 +20,16 @@ export function readCareObservations(): CareObservation[] {
 export function addCareObservation(observation: CareObservation): void {
   const current = readList<CareObservation>(OBSERVATIONS_KEY);
   window.localStorage.setItem(OBSERVATIONS_KEY, JSON.stringify([observation, ...current]));
+  window.dispatchEvent(new Event("memorylane:care-data-updated"));
+}
+
+export function readNursingNotes(): NursingNote[] {
+  return [...MOCK_NURSING_NOTES, ...readList<NursingNote>(NURSING_NOTES_KEY)];
+}
+
+export function addNursingNote(note: NursingNote): void {
+  const current = readList<NursingNote>(NURSING_NOTES_KEY);
+  window.localStorage.setItem(NURSING_NOTES_KEY, JSON.stringify([note, ...current]));
   window.dispatchEvent(new Event("memorylane:care-data-updated"));
 }
 

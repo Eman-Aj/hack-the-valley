@@ -6,7 +6,10 @@ import { MOCK_RESIDENTS, MOCK_OBSERVATIONS } from "../lib/mock-db";
 import { evaluateHealthSignals } from "../lib/signal-engine";
 import { readCareObservations } from "../lib/care-demo-storage";
 import ResidentAvatar from "./ResidentAvatar";
+import ResidentCareSnapshot from "./ResidentCareSnapshot";
 import ResidentClinicalSummary from "./ResidentClinicalSummary";
+import ResidentNursingNotes from "./ResidentNursingNotes";
+import useCareNursingNotes from "./useCareNursingNotes";
 import type { CareObservation, SignalStatus } from "../lib/types";
 
 const statusText: Record<SignalStatus, string> = {
@@ -15,6 +18,7 @@ const statusText: Record<SignalStatus, string> = {
 
 export default function CareTeamDashboard() {
   const [observations, setObservations] = useState<CareObservation[]>(MOCK_OBSERVATIONS);
+  const nursingNotes = useCareNursingNotes();
   useEffect(() => {
     const refresh = () => setObservations(readCareObservations());
     refresh(); window.addEventListener("memorylane:care-data-updated", refresh);
@@ -41,6 +45,8 @@ export default function CareTeamDashboard() {
         <div className="care-resident-card-top"><ResidentAvatar resident={resident}/><span className={`signal-status status-${signal.overallStatus}`}>{statusText[signal.overallStatus]}</span></div>
         <h4>{resident.displayName}</h4><p>Prefers {resident.preferredName} · Fictional profile</p>
         <ResidentClinicalSummary resident={resident} compact/>
+        <ResidentCareSnapshot resident={resident} compact/>
+        <ResidentNursingNotes resident={resident} notes={nursingNotes.filter((note) => note.residentId === resident.id).sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))} compact limit={1}/>
         <div className="resident-domain-summary">{(["meal_intake", "mobility_assistance", "sleep_disruption"] as const).map((domain) => <span key={domain}><i className={`domain-dot domain-${domain}`}/>{domain === "meal_intake" ? "Meals" : domain === "mobility_assistance" ? "Mobility" : "Sleep"}<b>{statusText[signal.details[domain].status]}</b></span>)}</div>
         <span className="care-resident-link">Open resident detail <b aria-hidden="true">→</b></span>
       </Link>)}
