@@ -388,6 +388,138 @@ textarea::placeholder, input::placeholder { color: #abb4ad; }
 
 /* Most page surfaces now carry a very soft coastal wash; content cards stay creamy. */
 .home-page, .route-page { background: linear-gradient(135deg, #eaf2ff 0%, #f5f8ff 48%, #e8f1ff 100%); }
+
+/* Warm, sunlit palette inspired by the shared reference. Keep text dark and
+   surfaces creamy so the softer colors remain comfortable for older readers. */
+:root {
+  --ink: #493832;
+  --ink-soft: #66534a;
+  --muted: #786b62;
+  --line: #e8d7b8;
+  --paper: #f7e9cb;
+  --ocean: #bd713b;
+  --ocean-deep: #9d572f;
+  --sky: #f4d778;
+  --cream: #fff0c4;
+  --cream-wash: #fff8e7;
+  --sea-glass: #d6dfc4;
+  --sand-accent: #d88743;
+  --sand-soft: #f8e6b6;
+  --sand-ink: #765037;
+}
+
+html { background: #f5e9cf; }
+body {
+  color: var(--ink);
+  background: linear-gradient(145deg, #f8edda 0%, #f3e7cd 48%, #f8efd9 100%);
+}
+.home-page, .route-page {
+  background: linear-gradient(145deg, #f8efd9 0%, #f3e7cd 54%, #f7ecd5 100%);
+}
+.home-header, .route-header, .topbar {
+  color: #fff5dc;
+  background: linear-gradient(110deg, #493631 0%, #594039 58%, #684537 100%);
+  border: 0;
+  box-shadow: 0 5px 18px rgb(69 47 37 / 12%);
+}
+.home-header, .route-header { padding: 0 20px; border-radius: 0 0 13px 13px; }
+.home-header .brand, .route-header .brand, .topbar .brand { color: #fff5dc; }
+.home-header .brand small, .route-header .brand small { color: #e9cf9e; }
+.route-header-right { color: #eddbc0; }
+.route-header-right a { color: #ffe4a1; }
+.topbar .breadcrumbs { color: #eedec4; }
+.topbar .breadcrumbs span { color: #bca18a; }
+.demo-pill { color: #5b4437; background: #f3d878; }
+.help-button { color: #513b32; border-color: #d7ba88; background: #fff0c4; }
+.brand-mark { color: #493832; background: linear-gradient(145deg, #ffe8a0, #eab85e); }
+.brand-mark::after { background: #c9793d; }
+
+.home-hero h1, .home-destination h2, .panel-heading h3,
+.senior-memory-content h3, .resident-identity h1, .page-heading-row h2,
+.signal-modal-heading h3 { color: #493832; }
+.home-hero h1 em { color: #a76537; }
+.home-hero > p, .home-eyebrow, .lead { color: #78685b; }
+.home-destination, .panel, .signal-modal, .home-card-family {
+  border-color: #ead9b8;
+  background: linear-gradient(145deg, #fff8e8 0%, #fff0ce 100%);
+}
+.home-card-care { background: linear-gradient(145deg, #fff8e8 0%, #f7e8c7 100%); }
+.home-card-senior { background: linear-gradient(145deg, #fff5d8 0%, #f7e1ad 100%); }
+.home-destination:hover { border-color: #d9ad70; box-shadow: 0 10px 24px rgb(103 68 40 / 12%); }
+.home-number, .home-action, .home-arrow { color: #875733; }
+.home-arrow { border-color: #e1c79a; background: #fff6df; }
+.home-action { border-color: #ead8b5; }
+.home-footer, .route-footer { color: #817366; }
+
+.button-primary, .memory-chat-input-row button {
+  border-color: #a85f34;
+  color: #fffaf0;
+  background: linear-gradient(110deg, #bd713b, #a75d34);
+}
+.button-primary:hover, .memory-chat-input-row button:hover { background: #96512e; }
+.button-outline, .button-soft, .date-button, .small-select {
+  border-color: #e2cda7;
+  color: #604936;
+  background: #fff8e9;
+}
+.button-outline:hover, .button-soft:hover { background: #fff0cf; }
+.button-text, .text-link { color: #95582f; }
+.tag-verified { color: #5f684a; background: #e8ebd5; }
+.tag-amber, .tag-pending { color: #79512d; background: #f7e4ae; }
+.review-banner { border-color: #ead49e; background: linear-gradient(110deg, #fff5d9, #f8e8bf); }
+.review-icon { color: #875832; background: #f1d785; }
+.review-title { color: #503c32; }
+.review-copy p, .memory-copy p { color: #706257; }
+.observation-summary, .signal-rule-box { background: #f8e9bd; }
+.signal-baseline-box { background: #f6ebd4; }
+.signal-baseline-box, .signal-rule-box { border: 1px solid #ebd8ae; }
+.change-item-button { background: transparent; }
+.change-item-button:hover { background: #fff6df; }
+.notes-tabs button.selected { color: #754b2e; }
+.notes-tabs button.selected::after { background: #ce8241; }
+.signal-modal-backdrop { background: rgb(54 39 31 / 48%); }
+
+.senior-route {
+  color: #493832;
+  background: linear-gradient(150deg, #f8efd9 0%, #f2e4c8 55%, #f7ead0 100%);
+}
+.senior-welcome, .senior-memory-card, .memory-chat-panel {
+  border-color: #e8d5ad;
+  background: linear-gradient(135deg, #fff7e3, #ffefc9);
+}
+.senior-welcome h2 { color: #493832; }
+.senior-welcome p, .senior-memory-content > p { color: #66564a; }
+.senior-welcome-icon, .senior-ask-icon, .memory-chat-icon {
+  color: #714a2f;
+  background: linear-gradient(145deg, #f8dc86, #f1c976);
+}
+.senior-memory-visual { border-color: #fff1cf; background: linear-gradient(135deg, #f5dc9e, #e9c48c); }
+.senior-memory-caption {
+  color: #493832;
+  background: linear-gradient(100deg, rgb(255 246 219 / 97%), rgb(255 237 194 / 95%));
+}
+.senior-memory-caption span, .senior-memory-date { color: #805b3b; }
+.senior-ask-button, .senior-speak-button {
+  border-color: #dfb66f;
+  color: #60412e;
+  background: linear-gradient(135deg, #fff8e6, #f5df9e 78%, #efc887);
+}
+.senior-ask-button:hover, .senior-speak-button:hover, .senior-speak-button.is-playing {
+  border-color: #c98549;
+  background: linear-gradient(135deg, #fff5d9, #f4d77f 78%, #e9b875);
+}
+.memory-chat-heading { border-color: #e8d6ae; background: linear-gradient(110deg, #f8e8b9, #fff2d1 62%, #f3d89b); }
+.memory-chat-context, .memory-chat-answer { background: #fff3d8; }
+.memory-chat-question { background: #f5e1ae; }
+.memory-chat-suggestions button { border-color: #dec28f; color: #68482f; background: #fff8e8; }
+.memory-chat-suggestions button:hover { background: #f8e9bf; }
+.memory-chat-voice { border-color: #ead8b2; background: linear-gradient(125deg, #fff5dd, #f6e4bd); }
+.voice-recorder-memory-question .voice-recorder-button { border-color: #dfbd7d; color: #67472e; background: linear-gradient(110deg, #fff8e6, #f5e2b6 75%, #f0ce91); }
+.memory-photo-trigger { background: #f4e6c8; }
+
+@media (max-width: 560px) {
+  .home-header, .route-header { padding-right: 12px; padding-left: 12px; }
+}
 .home-header, .route-header { border-color: #d9e5f5; }
 .home-destination, .panel, .senior-memory-card, .memory-chat-panel, .signal-modal {
   background: linear-gradient(145deg, #fffdf9 0%, #fff5e9 100%);
