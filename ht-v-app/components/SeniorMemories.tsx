@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import type { MemoryEntry } from "../lib/types";
+import { readSavedMemories } from "../lib/memory-storage";
 
 type Memory = {
   title: string;
@@ -9,6 +11,9 @@ type Memory = {
   story: string;
   art: string;
   questions: string[];
+  id?: string;
+  image?: string;
+  verifiedMemory?: MemoryEntry;
 };
 
 const memories: Memory[] = [
@@ -37,6 +42,19 @@ const memories: Memory[] = [
 
 export default function SeniorMemories() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
+  const [familyMemories, setFamilyMemories] = useState<Memory[]>([]);
+
+  useEffect(() => {
+    const refresh = () => setFamilyMemories(readSavedMemories().filter((entry) => entry.verificationStatus === "verified" && entry.sharingPermissions.visibleInAskMyStory).map((entry) => ({
+      id: entry.id, title: entry.proposedCaption, date: entry.eventDate || "A family memory",
+      story: entry.verifiedFacts.comfortingDetails || entry.familyStory, art: "", image: entry.image,
+      questions: ["Who is this?", "Tell me about this day"], verifiedMemory: entry,
+    })));
+    refresh();
+    window.addEventListener("memorylane:memories-updated", refresh);
+    return () => window.removeEventListener("memorylane:memories-updated", refresh);
+  }, []);
+  const allMemories = [...familyMemories, ...memories];
 
   return <section className={`senior-view ${activeMemory ? "has-active-memory" : ""}`}>
     {/* The senior view keeps one clear purpose: browse a memory or ask about it. */}
@@ -48,12 +66,12 @@ export default function SeniorMemories() {
 
     <div className="senior-layout">
       <div className="senior-memory-list">
-        {memories.map((memory) => <article className={`senior-memory-card ${activeMemory?.title === memory.title ? "is-active" : ""}`} key={memory.title}>
+        {allMemories.map((memory) => <article className={`senior-memory-card ${activeMemory?.title === memory.title ? "is-active" : ""}`} key={memory.id ?? memory.title}>
           {/* A large picture placeholder leaves room for the real approved family photo. */}
-          <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
+          {memory.image ? <img className="senior-memory-image senior-memory-upload" src={memory.image} alt={memory.title}/> : <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
             <span className="senior-sun"/><span className="senior-hill senior-hill-one"/><span className="senior-hill senior-hill-two"/>
             <span className="senior-photo-label">Family photo</span>
-          </div>
+          </div>}
           <div className="senior-memory-content">
             <div className="senior-memory-date">{memory.date}</div>
             <h3>{memory.title}</h3>
@@ -68,7 +86,7 @@ export default function SeniorMemories() {
       </div>
 
       {/* The side chat only appears after Nancy chooses a memory, so it has clear context. */}
-      {activeMemory && <MemoryQuestionPanel key={activeMemory.title} memory={activeMemory} onClose={() => setActiveMemory(null)} />}
+      {activeMemory && <MemoryQuestionPanel key={activeMemory.id ?? activeMemory.title} memory={activeMemory} onClose={() => setActiveMemory(null)} />}
     </div>
     <div className="senior-end-note"><span aria-hidden="true">♡</span> More memories are waiting below. Keep scrolling when you&apos;re ready.</div>
   </section>;
@@ -76,12 +94,23 @@ export default function SeniorMemories() {
 
 function MemoryQuestionPanel({ memory, onClose }: { memory: Memory; onClose: () => void }) {
   const [question, setQuestion] = useState("");
-  const [answerVisible, setAnswerVisible] = useState(false);
+  const [answer, setAnswer] = useState("");
+  const [asking, setAsking] = useState(false);
 
-  function askQuestion(value: string) {
+  async function askQuestion(value: string) {
     if (!value.trim()) return;
-    setQuestion(value.trim());
-    setAnswerVisible(true);
+    setQuestion(value.trim()); setAnswer(""); setAsking(true);
+    try {
+      if (!memory.verifiedMemory) { setAnswer(memory.story); return; }
+      const response = await fetch("/api/ask-story", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+        residentPreferredName: "Nancy", question: value.trim(), verifiedMemories: [{
+          id: memory.verifiedMemory.id, eventDate: memory.verifiedMemory.eventDate, contributorId: memory.verifiedMemory.contributorId,
+          proposedCaption: memory.verifiedMemory.proposedCaption, familyStory: memory.verifiedMemory.familyStory, verifiedFacts: memory.verifiedMemory.verifiedFacts,
+        }],
+      }) });
+      const data = await response.json(); setAnswer(data.result?.answer ?? memory.story);
+    } catch { setAnswer(memory.story); }
+    finally { setAsking(false); }
   }
 
   return <aside className="memory-chat-panel" aria-label="Ask about this memory">
@@ -99,15 +128,16 @@ function MemoryQuestionPanel({ memory, onClose }: { memory: Memory; onClose: () 
     <div className="memory-chat-suggestions">
       {memory.questions.map((suggestion) => <button key={suggestion} onClick={() => askQuestion(suggestion)}>{suggestion}</button>)}
     </div>
-    {answerVisible && <div className="memory-chat-exchange" aria-live="polite">
+    {answer && <div className="memory-chat-exchange" aria-live="polite">
       <div className="memory-chat-question"><span>You asked</span><p>{question}</p></div>
-      <div className="memory-chat-answer"><span>From your family&apos;s memory</span><p>{memory.story}</p></div>
+      <div className="memory-chat-answer"><span>From your family&apos;s memory</span><p>{answer}</p></div>
     </div>}
-    <form className="memory-chat-form" onSubmit={(event) => { event.preventDefault(); askQuestion(question); }}>
+    {asking && <p className="memory-chat-note" role="status">Finding an answer from this memory…</p>}
+    <form className="memory-chat-form" onSubmit={(event) => { event.preventDefault(); void askQuestion(question); }}>
       <label htmlFor="memory-question">Type a question about this picture</label>
       <div className="memory-chat-input-row">
-        <input id="memory-question" value={question} onChange={(event) => { setQuestion(event.target.value); setAnswerVisible(false); }} placeholder="Your question..." />
-        <button type="submit" aria-label="Ask question">→</button>
+        <input id="memory-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Your question..." />
+        <button type="submit" aria-label="Ask question" disabled={asking}>→</button>
       </div>
     </form>
     <p className="memory-chat-note">Answers use details Nancy&apos;s family has shared.</p>

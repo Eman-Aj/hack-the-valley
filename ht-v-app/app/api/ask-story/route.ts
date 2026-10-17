@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { GoogleGenAI, Type } from "@google/genai";
 import { AskStoryInputSchema, AskStoryOutputSchema, AskStoryOutput } from "../../../lib/validation";
+import { generateGeminiJson } from "../../../lib/gemini-rest";
 
 // Offline fallback so the demo never breaks
 // Offline fallback so the demo never breaks
@@ -22,6 +22,23 @@ function buildDeterministicFallback(
       citedMemoryIds: [theoMemory.id],
       gentleFollowUpPrompt: "Would you like to hear more about the day they brought Theo to visit?",
     };
+  }
+
+  // For browser-demo memories, answer from the one memory explicitly in context.
+  // If the family record doesn't contain the requested detail, keep the safe unknown response below.
+  if (verifiedMemories.length === 1) {
+    const memory = verifiedMemories[0];
+    const facts = memory.verifiedFacts;
+    const people = facts.people.map((person: any) => `${person.name}${person.relationship ? `, ${person.relationship}` : ""}`);
+    if ((q.includes("who") || q.includes("person")) && people.length > 0) {
+      return { answer: `Your family confirmed that ${people.join(" and ")} ${people.length === 1 ? "is" : "are"} part of this memory. ${facts.comfortingDetails || memory.proposedCaption}`, isSupported: true, citedMemoryIds: [memory.id], gentleFollowUpPrompt: "Would you like to hear the family story about this picture?" };
+    }
+    if (q.includes("where") && facts.locationOrContext) {
+      return { answer: `Your family shared that this memory is connected with ${facts.locationOrContext}. ${facts.comfortingDetails}`, isSupported: true, citedMemoryIds: [memory.id], gentleFollowUpPrompt: "Would you like to hear more about this memory?" };
+    }
+    if ((q.includes("tell me") || q.includes("what") || q.includes("day") || q.includes("picture")) && (memory.familyStory || facts.comfortingDetails)) {
+      return { answer: `${facts.comfortingDetails || memory.proposedCaption} ${memory.familyStory}`.trim(), isSupported: true, citedMemoryIds: [memory.id], gentleFollowUpPrompt: "Would you like to ask about someone in this memory?" };
+    }
   }
 
   return {
@@ -75,9 +92,6 @@ export async function POST(req: Request) {
     }
 
     // 4. Connect to Google AI
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-
     const prompt = `You are "Ask My Story", a warm, reassuring memory assistant for ${residentPreferredName}.
 CRITICAL SAFETY RULES:
 1. Answer the question ONLY using the Verified Family Memories provided below.
@@ -91,28 +105,16 @@ Verified Family Memories (JSON):
 ${JSON.stringify(verifiedMemories, null, 2)}`;
 
     // 5. Force Gemini to return JSON
-    const response = await ai.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            answer: { type: Type.STRING },
-            isSupported: { type: Type.BOOLEAN },
-            citedMemoryIds: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-            },
-            gentleFollowUpPrompt: { type: Type.STRING },
-          },
-          required: ["answer", "isSupported", "citedMemoryIds", "gentleFollowUpPrompt"],
-        },
+    const rawJson = JSON.parse(await generateGeminiJson([{ text: prompt }], {
+      type: "OBJECT",
+      properties: {
+        answer: { type: "STRING" },
+        isSupported: { type: "BOOLEAN" },
+        citedMemoryIds: { type: "ARRAY", items: { type: "STRING" } },
+        gentleFollowUpPrompt: { type: "STRING" },
       },
-    });
-
-    const rawJson = JSON.parse(response.text || "{}");
+      required: ["answer", "isSupported", "citedMemoryIds", "gentleFollowUpPrompt"],
+    }));
     const validated = AskStoryOutputSchema.parse(rawJson);
 
     return NextResponse.json({ result: validated, source: "gemini" });

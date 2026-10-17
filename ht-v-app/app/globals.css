@@ -405,6 +405,32 @@ textarea::placeholder, input::placeholder { color: #abb4ad; }
 .memory-chat-context { background: linear-gradient(120deg, #fff5e8 0%, #ffead1 100%); }
 .memory-chat-answer { background: linear-gradient(120deg, #f4f8ff 0%, #fff5e9 100%); }
 .caregiver-notes, .change-panel, .context-panel, .add-memory-panel { background: linear-gradient(145deg, #fffdf9 0%, #fff4e5 100%); }
+
+/* Family memory upload and explicit review state. */
+.upload-drop { padding: 14px; text-align: center; }
+.memory-upload-preview { display: block; width: min(100%, 300px); height: 155px; object-fit: contain; border-radius: 7px; background: #eaf2ff; }
+.form-help { margin: -4px 0 0; color: #71839a; font-size: 10px; line-height: 1.5; }
+.memory-form-message { margin: 12px 0 0; padding: 10px 12px; border-radius: 7px; font-size: 12px; line-height: 1.5; }
+.memory-form-message.is-error { color: #8a493f; background: #fff0e9; }
+.memory-form-message.is-success { color: #315e50; background: #edf8f1; }
+.memory-draft-review { margin-top: 16px; padding: 18px; border: 1px solid #cbdcf1; border-radius: 9px; background: linear-gradient(140deg, #f5f9ff 0%, #fff8ed 100%); }
+.draft-review-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.draft-review-heading h3 { margin: 0; color: #30465d; font: 500 20px Georgia, serif; }
+.memory-draft-review .form-field label { margin-top: 9px; }
+.draft-comfort { margin-top: 4px; }
+.draft-confirmation-notes { margin: 12px 0; padding: 10px 12px 10px 28px; border-radius: 6px; color: #765c3d; background: #fff1dc; font-size: 12px; line-height: 1.6; }
+.memory-confirm-check { display: flex; align-items: flex-start; gap: 10px; margin: 15px 0; color: #344f68; font-size: 13px; line-height: 1.5; }
+.memory-confirm-check input { flex: 0 0 auto; width: 18px; height: 18px; accent-color: #466b9e; }
+.memory-draft-review > .button { min-height: 42px; padding: 0 18px; font-size: 13px; }
+.memory-draft-review > .button:disabled { cursor: not-allowed; opacity: .52; }
+.memory-card-photo { display: block; width: 100%; height: 110px; object-fit: cover; }
+.senior-memory-upload { display: block; width: 100%; object-fit: cover; }
+
+@media (max-width: 560px) {
+  .memory-draft-review { padding: 13px; }
+  .memory-confirm-check { font-size: 12px; }
+  .memory-draft-review > .button { width: 100%; }
+}
 .signal-baseline-box { background: linear-gradient(110deg, #eaf2ff 0%, #f4f8ff 100%); }
 .signal-rule-box { background: linear-gradient(110deg, #fff5e8 0%, #ffead1 100%); }
 .signal-modal-backdrop { background: rgb(34 58 82 / 38%); }

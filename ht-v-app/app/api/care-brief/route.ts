@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { GoogleGenAI, Type } from "@google/genai";
 import { CareBriefInputSchema, CareBriefOutputSchema } from "../../../lib/validation";
+import { generateGeminiJson } from "../../../lib/gemini-rest";
 import { evaluateHealthSignals } from "../../../lib/signal-engine";
 import { MOCK_RESIDENTS, MOCK_OBSERVATIONS, MOCK_MEMORIES } from "../../../lib/mock-db";
 
@@ -40,9 +40,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-
     const prompt = `You are an AI nursing assistant generating a shift-change Care Brief for ${resident.preferredName}.
 CRITICAL INSTRUCTIONS:
 1. Review the Health Signals below. Summarize any "needs_review" alerts clearly in the clinicalAlerts array.
@@ -56,30 +53,15 @@ VERIFIED MEMORIES:
 ${JSON.stringify(careTeamMemories, null, 2)}`;
 
     // 6. Force Gemini to return structured JSON
-    const response = await ai.models.generateContent({
-      model,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            shiftSummary: { type: Type.STRING },
-            clinicalAlerts: { 
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            conversationStarters: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            }
-          },
-          required: ["shiftSummary", "clinicalAlerts", "conversationStarters"],
-        },
+    const rawJson = JSON.parse(await generateGeminiJson([{ text: prompt }], {
+      type: "OBJECT",
+      properties: {
+        shiftSummary: { type: "STRING" },
+        clinicalAlerts: { type: "ARRAY", items: { type: "STRING" } },
+        conversationStarters: { type: "ARRAY", items: { type: "STRING" } },
       },
-    });
-
-    const rawJson = JSON.parse(response.text || "{}");
+      required: ["shiftSummary", "clinicalAlerts", "conversationStarters"],
+    }));
     const validated = CareBriefOutputSchema.parse(rawJson);
 
     return NextResponse.json({ result: validated, residentName: resident.preferredName });

@@ -2,10 +2,10 @@ import { z } from "zod";
 
 // --- JOB 1: DRAFT MEMORY SCHEMAS ---
 export const DraftMemoryInputSchema = z.object({
-  familyStory: z.string().min(1, "Please provide a short story or note."),
-  contributorName: z.string().default("Family Member"),
-  eventDateHint: z.string().optional(),
-  imageBase64: z.string().optional(),
+  familyStory: z.string().trim().min(1, "Please provide a short story or note.").max(3000),
+  contributorName: z.string().trim().max(120).default("Family Member"),
+  eventDateHint: z.string().trim().max(120).optional(),
+  imageBase64: z.string().max(12_000_000).optional(),
 });
 
 export const DraftMemoryOutputSchema = z.object({
