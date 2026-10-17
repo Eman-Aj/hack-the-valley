@@ -1,83 +1,52 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
-import { DraftMemoryInputSchema, DraftMemoryOutputSchema, DraftMemoryOutput } from "../../../lib/validation";
-
-// If Gemini is down or the API key is missing, this offline fallback ensures the demo still works flawlessly.
-function buildFallbackDraft(familyStory: string, eventDateHint?: string): DraftMemoryOutput {
-  const mentionsTheo = /theo/i.test(familyStory);
-  return {
-    proposedCaption: mentionsTheo
-      ? "Nancy holding her newborn grandson Theo for the first time."
-      : familyStory.slice(0, 110),
-    suggestedEventDate: eventDateHint || new Date().toISOString().split("T")[0],
-    people: mentionsTheo
-      ? [
-          { name: "Theo", relationship: "Grandson (Newborn)" },
-          { name: "David Wilson", relationship: "Son" },
-        ]
-      : [],
-    locationOrContext: "Family visit",
-    comfortingDetails: familyStory,
-    needsConfirmationNotes: [
-      "Please verify exact names, spelling, and relationship labels before saving.",
-    ],
-  };
-}
+import { DraftMemoryInputSchema, DraftMemoryOutputSchema } from "../../../lib/validation";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    // 1. Validate the incoming request from the frontend
-    const parsedInput = DraftMemoryInputSchema.safeParse(body);
-    if (!parsedInput.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: parsedInput.error.flatten() },
-        { status: 400 }
-      );
+    // 1. Validate incoming data (imageBase64 is optional in your Zod schema)
+    const parsed = DraftMemoryInputSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { familyStory, contributorName, eventDateHint, imageBase64 } = parsedInput.data;
+    const { familyStory, contributorName, eventDateHint, imageBase64 } = parsed.data;
 
-    // 2. If there is no API key, instantly return the demo fallback data
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({
-        draft: buildFallbackDraft(familyStory, eventDateHint),
-        source: "fallback_no_api_key",
-      });
+      return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
     }
 
-    // 3. Connect to Google AI
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
-    const contents: any[] = [];
+    // 2. Build the base text prompt
+    let contents: any[] = [
+      `You are an AI assistant helping a family member (${contributorName}) draft a memory for a senior care resident.
+      Extract the details from their note: "${familyStory}"
+      Event Date Hint: ${eventDateHint || "Not provided"}`
+    ];
 
-    // Optional: If the frontend sends an image, attach it for Gemini to analyze
-    if (imageBase64 && imageBase64.startsWith("data:image/")) {
-      const [header, base64Data] = imageBase64.split(",");
-      const mimeType = header.match(/data:(.*);base64/)?.[1] || "image/jpeg";
+    // 3. Inject Vision AI if an image was uploaded
+    if (imageBase64) {
+      // Clean the string just in case the frontend sends the data URI prefix
+      const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+      
       contents.push({
-        inlineData: { data: base64Data, mimeType },
+        inlineData: {
+          data: cleanBase64,
+          mimeType: "image/jpeg", 
+        },
       });
+      
+      contents[0] += "\n\nAN IMAGE WAS PROVIDED. Look closely at the photo to enrich the 'comfortingDetails' and 'locationOrContext', and identify the mood or activities happening in the background.";
     }
 
-    // Give Gemini explicit rules so it doesn't hallucinate medical data
-    contents.push(
-      `You are assisting a family member (${contributorName}) in drafting a structured memory entry for a loved one living with dementia.
-Rules:
-1. Extract ONLY facts explicitly stated in the family story. Do NOT guess names or relationships from the photo alone.
-2. If any detail (date, exact relationship, location) is unclear, add a reminder in needsConfirmationNotes.
-3. Write a warm, concise proposedCaption suitable for looking at together.
-
-Family story provided: "${familyStory}"
-Date hint: "${eventDateHint || "Not provided"}"`
-    );
-
-    // 4. Force Gemini to return strictly formatted JSON using Structured Outputs
+    // 4. Force strict JSON return
     const response = await ai.models.generateContent({
       model,
-      contents,
+      contents: contents,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -85,47 +54,28 @@ Date hint: "${eventDateHint || "Not provided"}"`
           properties: {
             proposedCaption: { type: Type.STRING },
             suggestedEventDate: { type: Type.STRING },
-            people: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  name: { type: Type.STRING },
-                  relationship: { type: Type.STRING },
-                },
-                required: ["name", "relationship"],
-              },
+            people: { 
+              type: Type.ARRAY, 
+              items: { 
+                type: Type.OBJECT, 
+                properties: { name: { type: Type.STRING }, relationship: { type: Type.STRING } }
+              } 
             },
             locationOrContext: { type: Type.STRING },
             comfortingDetails: { type: Type.STRING },
-            needsConfirmationNotes: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-            },
+            needsConfirmationNotes: { type: Type.ARRAY, items: { type: Type.STRING } },
           },
-          required: [
-            "proposedCaption",
-            "suggestedEventDate",
-            "people",
-            "locationOrContext",
-            "comfortingDetails",
-            "needsConfirmationNotes",
-          ],
+          required: ["proposedCaption", "suggestedEventDate", "people", "locationOrContext", "comfortingDetails", "needsConfirmationNotes"],
         },
       },
     });
 
-    // 5. Parse the AI response and run it through Zod validation to be 100% safe
     const rawJson = JSON.parse(response.text || "{}");
     const validated = DraftMemoryOutputSchema.parse(rawJson);
 
-    return NextResponse.json({ draft: validated, source: "gemini" });
+    return NextResponse.json({ draft: validated, source: imageBase64 ? "gemini_vision" : "gemini_text" });
   } catch (error) {
-    console.error("Draft memory fallback triggered:", error);
-    // If the API crashes during judging, the app won't break—it just uses the fallback.
-    return NextResponse.json({
-      draft: buildFallbackDraft("Family memory entry"),
-      source: "fallback_error",
-    });
+    console.error("Draft Memory Error:", error);
+    return NextResponse.json({ error: "Failed to draft memory" }, { status: 500 });
   }
 }

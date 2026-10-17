@@ -54,3 +54,16 @@ export const AskStoryOutputSchema = z.object({
 });
 
 export type AskStoryOutput = z.infer<typeof AskStoryOutputSchema>;
+
+// --- JOB 3: CARE BRIEF SCHEMAS ---
+export const CareBriefInputSchema = z.object({
+  residentId: z.string(),
+});
+
+export const CareBriefOutputSchema = z.object({
+  shiftSummary: z.string(),
+  clinicalAlerts: z.array(z.string()),
+  conversationStarters: z.array(z.string()),
+});
+
+export type CareBriefOutput = z.infer<typeof CareBriefOutputSchema>;
