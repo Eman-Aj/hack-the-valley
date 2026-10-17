@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CareThread | Care that remembers the whole person",
+  title: "MemoryLane | A gentler way to stay connected",
   description: "A person-centered memory and care handoff prototype for Nancy Wilson.",
 };
 

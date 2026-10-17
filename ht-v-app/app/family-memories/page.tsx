@@ -6,7 +6,7 @@ export default function FamilyMemoriesPage() {
     <RouteHeader section="Family & care partners" />
     <div className="route-content family-route-content">
       <FamilyMemories />
-      <footer className="route-footer">CareThread prototype · Fictional demo data</footer>
+      <footer className="route-footer">MemoryLane prototype · Fictional demo data</footer>
     </div>
   </main>;
 }

@@ -34,8 +34,8 @@ export default function Home() {
   return <main className="home-page">
     <header className="home-header">
       <Link className="brand" href="/">
-        <span className="brand-mark">ct</span>
-        <span><strong>carethread</strong><small>PERSON-CENTERED CARE</small></span>
+        <span className="brand-mark">ml</span>
+        <span><strong>MemoryLane</strong><small>MEMORIES & CARE</small></span>
       </Link>
       <span className="demo-pill">FICTIONAL DEMO</span>
     </header>
@@ -46,7 +46,7 @@ export default function Home() {
       <p>Choose a space to continue. Each one is designed for a different part of Nancy&apos;s care.</p>
     </section>
 
-    <section className="home-destinations" aria-label="Choose a CareThread space">
+    <section className="home-destinations" aria-label="Choose a MemoryLane space">
       {destinations.map((item) => <Link className={`home-destination ${item.tone}`} href={item.href} key={item.href}>
         <div className="home-destination-top"><span className="home-number">{item.number}</span><span className="home-arrow" aria-hidden="true">↗</span></div>
         <div className="section-kicker">{item.role}</div>
@@ -56,6 +56,6 @@ export default function Home() {
       </Link>)}
     </section>
 
-    <footer className="home-footer"><span>CareThread prototype</span><span>For demonstration only · Not a clinical decision tool</span></footer>
+    <footer className="home-footer"><span>MemoryLane prototype</span><span>For demonstration only · Not a clinical decision tool</span></footer>
   </main>;
 }

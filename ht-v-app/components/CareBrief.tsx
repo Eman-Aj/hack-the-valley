@@ -35,7 +35,7 @@ export default function CareBrief() {
   const [activeSignal, setActiveSignal] = useState<SignalKey | null>(null);
 
   return <>
-    <div className="page-heading-row"><div><div className="section-kicker">HANDOFF OVERVIEW</div><h2>Today&apos;s care brief</h2><p className="lead">A thoughtful start to Nancy&apos;s next visit.</p></div><span className="tag tag-green">FICTIONAL DEMO DATA</span></div>
+    <div className="page-heading-row"><div><div className="section-kicker">HANDOFF OVERVIEW</div><h2>Today&apos;s care brief</h2><p className="lead">A thoughtful start to Nancy&apos;s next visit.</p></div><span className="tag tag-verified">FICTIONAL DEMO DATA</span></div>
 
     {/* Signals request qualified human review; they are not diagnoses or predictions. */}
     <section className="review-banner">
@@ -47,7 +47,7 @@ export default function CareBrief() {
     <div className="brief-grid">
       <div className="primary-column">
         <section className="panel context-panel">
-          <div className="panel-heading"><div><div className="section-kicker">KNOW THE PERSON</div><h3>Personal context</h3></div><span className="tag tag-green"><span className="tiny-check">✓</span> VERIFIED</span></div>
+          <div className="panel-heading"><div><div className="section-kicker">KNOW THE PERSON</div><h3>Personal context</h3></div><span className="tag tag-verified"><span className="tiny-check">✓</span> VERIFIED</span></div>
           <div className="memory-highlight">
             <div className="memory-art" aria-label="Illustration placeholder for a family photo" role="img"><span className="sun"/><span className="hill hill-one"/><span className="hill hill-two"/><span className="photo-caption">A family moment</span></div>
             <div className="memory-copy"><div className="memory-date">FAMILY MEMORY <span>·</span> JUNE 14, 2024</div><h4>The day Nancy met Theo</h4><p>Nancy&apos;s grandson Theo was just a few weeks old. She loves telling people about the day they met.</p><div className="source-line"><span className="source-avatar">JW</span> Shared by Jordan, her son</div></div>

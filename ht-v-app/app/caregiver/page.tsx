@@ -13,7 +13,7 @@ export default function CaregiverPage() {
         <span className="demo-pill">DEMO DATA</span>
       </div>
       <CareBrief />
-      <footer className="route-footer">CareThread prototype · Not a clinical decision tool</footer>
+      <footer className="route-footer">MemoryLane prototype · Not a clinical decision tool</footer>
     </div>
   </main>;
 }
