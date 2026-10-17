@@ -4,13 +4,8 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import type { DraftMemoryOutput } from "../lib/validation";
 import type { MemoryEntry } from "../lib/types";
 import { readSavedMemories, saveMemory } from "../lib/memory-storage";
+import { MOCK_MEMORIES } from "../lib/mock-db";
 import MemoryImageViewer from "./MemoryImageViewer";
-
-const samples = [
-  { title: "The day Nancy met Theo", date: "June 14, 2024", status: "Verified", description: "A first meeting with her new grandson.", art: "memory-art" },
-  { title: "Sunday dinners at home", date: "October 02, 2023", status: "Verified", description: "Nancy's favorite tradition was gathering everyone around the table.", art: "memory-art art-dinner" },
-  { title: "A trip to the lake", date: "August 19, 2022", status: "Needs review", description: "A summer afternoon with family by the water.", art: "memory-art art-lake" },
-];
 
 export default function FamilyMemories() {
   const fileInput = useRef<HTMLInputElement>(null);
@@ -120,11 +115,20 @@ export default function FamilyMemories() {
         <button className="button button-primary" disabled={!confirmed} onClick={confirmMemory}>Save confirmed memory</button>
       </section>}
     </section>
-    <div className="gallery-heading"><div><div className="section-kicker">NANCY&apos;S STORY</div><h3>Memory collection <span className="count-pill">{samples.length + saved.length}</span></h3></div><span className="small-select">All memories</span></div>
-    <div className="memory-grid">{saved.map((memory) => <MemoryCard key={memory.id} title={memory.proposedCaption} date={memory.eventDate || "Date not added"} status="Verified" description={memory.familyStory} image={memory.image}/>)}{samples.map((memory) => <MemoryCard key={memory.title} {...memory}/>)}</div>
+    <div className="gallery-heading"><div><div className="section-kicker">NANCY&apos;S STORY</div><h3>Memory collection <span className="count-pill">{MOCK_MEMORIES.filter((memory) => memory.residentId === "res_001").length + saved.length}</span></h3></div><span className="small-select">All memories</span></div>
+    <div className="memory-grid">{[...MOCK_MEMORIES.filter((memory) => memory.residentId === "res_001"), ...saved.filter((memory) => memory.residentId === "res_001")].map((memory) => <MemoryRecordCard key={memory.id} memory={memory}/>)}</div>
   </>;
 }
 
-function MemoryCard({ title, date, status, art = "memory-art", description, image }: { title: string; date: string; status: string; art?: string; description: string; image?: string }) {
-  return <article className="panel memory-card">{image ? <MemoryImageViewer src={image} alt={title} title={title} imageClassName="memory-card-photo"/> : <div className={`memory-art card-art ${art}`} aria-hidden="true"><span className="sun"/><span className="hill hill-one"/><span className="hill hill-two"/></div>}<div className="memory-card-body"><div className="memory-card-meta"><span>{date}</span><span className={`tag tag-${status === "Verified" ? "verified" : "pending"}`}>{status === "Verified" ? "✓ " : "• "}{status}</span></div><h4>{title}</h4><p>{description}</p><div className="source-line"><span className="source-avatar">JW</span> Shared by Jordan, her son</div></div></article>;
+function MemoryRecordCard({ memory }: { memory: MemoryEntry }) {
+  const verified = memory.verificationStatus === "verified";
+  const people = memory.verifiedFacts.people.map((person) => `${person.name} (${person.relationship})`).join(" · ");
+  return <article className="panel memory-card">
+    {memory.image ? <MemoryImageViewer src={memory.image} alt={memory.proposedCaption} title={memory.proposedCaption} imageClassName="memory-card-photo"/> : <div className="memory-art card-art" role="img" aria-label="Photo not available; neutral placeholder shown"><span className="photo-caption">Photo not available</span></div>}
+    <div className="memory-card-body"><div className="memory-card-meta"><span>{memory.eventDate || "Date not added"}</span><span className={`tag tag-${verified ? "verified" : "pending"}`}>{verified ? "✓ Verified" : "Draft for review"}</span></div>
+      <h4>{memory.proposedCaption}</h4><p>{memory.familyStory}</p><p className="memory-record-facts"><strong>Confirmed:</strong> {people || "No people or relationships confirmed"}<br/><strong>Context:</strong> {memory.verifiedFacts.locationOrContext || "Not recorded"}</p>
+      <div className="source-line"><span className="source-avatar">{memory.contributorId.slice(0, 1)}</span> Shared by {memory.contributorId} · Event date {memory.verifiedFacts.eventDate || "not specified"}</div>
+      <div className="memory-permission-list"><span>{memory.sharingPermissions.visibleInAskMyStory ? "✓ Ask My Story" : "— Ask My Story"}</span><span>{memory.sharingPermissions.includeInCareBrief ? "✓ Care brief" : "— Care brief"}</span></div>
+    </div>
+  </article>;
 }

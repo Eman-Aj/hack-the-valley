@@ -15,6 +15,12 @@ import type { CareObservation, SignalStatus } from "../lib/types";
 const statusText: Record<SignalStatus, string> = {
   needs_review: "Needs review", monitor: "Monitor", no_pattern_detected: "No pattern detected", insufficient_data: "Insufficient data",
 };
+const statusExplanation: Record<SignalStatus, string> = {
+  needs_review: "Sustained changes across multiple care domains",
+  monitor: "A sustained change in one care domain",
+  no_pattern_detected: "Recent observations are near the resident’s baseline",
+  insufficient_data: "Recent observations are missing",
+};
 
 export default function CareTeamDashboard() {
   const [observations, setObservations] = useState<CareObservation[]>(MOCK_OBSERVATIONS);
@@ -29,6 +35,7 @@ export default function CareTeamDashboard() {
     needs_review: summaries.filter(({ signal }) => signal.overallStatus === "needs_review").length,
     monitor: summaries.filter(({ signal }) => signal.overallStatus === "monitor").length,
     insufficient: summaries.filter(({ signal }) => signal.overallStatus === "insufficient_data").length,
+    no_pattern: summaries.filter(({ signal }) => signal.overallStatus === "no_pattern_detected").length,
   };
 
   return <>
@@ -38,18 +45,19 @@ export default function CareTeamDashboard() {
       <SummaryCard label="Needs review" value={String(counts.needs_review)} detail="Multiple sustained domain changes" tone="review"/>
       <SummaryCard label="Monitor" value={String(counts.monitor)} detail="One domain has a sustained change" tone="monitor"/>
       <SummaryCard label="Insufficient data" value={String(counts.insufficient)} detail="Missing observations are not normal" tone="quiet"/>
+      <SummaryCard label="No current pattern" value={String(counts.no_pattern)} detail="Recent values near baseline" tone="stable"/>
     </section>
     <div className="resident-list-heading"><div><div className="section-kicker">RESIDENTS</div><h3>Choose a resident</h3></div><span>Signals from deterministic demo rules</span></div>
     <section className="care-resident-grid" aria-label="Residents">
-      {summaries.map(({ resident, signal }) => <Link className="panel care-resident-card" href={`/caregiver/resident/${resident.id}`} key={resident.id}>
+      {summaries.map(({ resident, signal }) => <article className="panel care-resident-card" key={resident.id}>
         <div className="care-resident-card-top"><ResidentAvatar resident={resident}/><span className={`signal-status status-${signal.overallStatus}`}>{statusText[signal.overallStatus]}</span></div>
-        <h4>{resident.displayName}</h4><p>Prefers {resident.preferredName} · Fictional profile</p>
+        <h4>{resident.displayName}</h4><p>Prefers {resident.preferredName} · {statusExplanation[signal.overallStatus]}</p>
         <ResidentClinicalSummary resident={resident} compact/>
         <ResidentCareSnapshot resident={resident} compact/>
         <ResidentNursingNotes resident={resident} notes={nursingNotes.filter((note) => note.residentId === resident.id).sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))} compact limit={1}/>
         <div className="resident-domain-summary">{(["meal_intake", "mobility_assistance", "sleep_disruption"] as const).map((domain) => <span key={domain}><i className={`domain-dot domain-${domain}`}/>{domain === "meal_intake" ? "Meals" : domain === "mobility_assistance" ? "Mobility" : "Sleep"}<b>{statusText[signal.details[domain].status]}</b></span>)}</div>
-        <span className="care-resident-link">Open resident detail <b aria-hidden="true">→</b></span>
-      </Link>)}
+        <div className="care-resident-actions"><Link className="care-resident-link" href={`/caregiver/resident/${resident.id}`}>View observations <b aria-hidden="true">→</b></Link><Link className="care-resident-link" href={`/caregiver/resident/${resident.id}/brief`}>View care brief <b aria-hidden="true">→</b></Link></div>
+      </article>)}
     </section>
     <p className="care-rules-disclaimer">All observations and names are fictional. The configured rules only prompt a qualified person to review recorded changes; they do not diagnose or predict a condition.</p>
   </>;

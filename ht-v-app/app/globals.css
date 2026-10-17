@@ -587,7 +587,7 @@ body {
 .home-destinations-two { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 930px; margin-right: auto; margin-left: auto; }
 .home-destinations-two .home-destination { min-height: 255px; }
 .care-dashboard-heading { margin-top: 13px; }
-.care-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+.care-summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
 .care-summary-card { min-height: 126px; padding: 16px; border-color: #dce7f4; }
 .care-summary-card > span, .care-summary-card > small { display: block; }
 .care-summary-card > span { color: #667c95; font-size: 12px; font-weight: 700; }
@@ -597,11 +597,12 @@ body {
 .summary-review > strong { color: #a36b3d; }
 .summary-monitor { background: linear-gradient(145deg, #f7faff, #e9f1fc); }
 .summary-quiet { background: linear-gradient(145deg, #fafdff, #eef5fb); }
+.summary-stable { background: linear-gradient(145deg, #f5fbf7, #eaf5ee); }
 .resident-list-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 12px; }
 .resident-list-heading h3 { margin: 0; color: #30465d; font: 500 21px Georgia, serif; }
 .resident-list-heading > span { color: #8291a2; font-size: 10px; }
 .care-resident-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
-.care-resident-card { display: block; min-height: 204px; padding: 15px; color: inherit; text-decoration: none; border-color: #d9e5f4; transition: transform .16s ease, box-shadow .16s ease; }
+.care-resident-card { display: block; min-height: 204px; padding: 15px; color: inherit; border-color: #d9e5f4; transition: transform .16s ease, box-shadow .16s ease; }
 .care-resident-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgb(48 70 93 / 9%); }
 .care-resident-card-top { display: flex; align-items: center; justify-content: space-between; }
 .care-resident-avatar { display: block; width: 48px; height: 48px; flex: 0 0 48px; overflow: hidden; border: 1px solid rgb(64 94 128 / 12%); }
@@ -687,7 +688,12 @@ body {
 .resident-domain-summary b { color: #5d7087; font-size: 9px; font-weight: 600; }
 .domain-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #7796bd; }
 .domain-meal_intake { background: #4c79b8; }.domain-mobility_assistance { background: #bd7c42; }.domain-sleep_disruption { background: #588c7d; }
-.care-resident-link { display: flex; justify-content: space-between; margin-top: 11px; color: #466b9e; font-size: 10px; font-weight: 700; }
+.care-resident-actions { display: flex; flex-wrap: wrap; gap: 5px 16px; }
+.care-resident-link { display: flex; justify-content: space-between; margin-top: 11px; color: #466b9e; font-size: 10px; font-weight: 700; text-decoration: none; }
+.care-resident-link:hover { text-decoration: underline; }
+.memory-record-facts { min-height: 0 !important; margin: 0 0 9px !important; color: #687d94 !important; }
+.memory-permission-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; color: #607a69; font-size: 8px; font-weight: 700; }
+.memory-permission-list span { padding: 4px 6px; border-radius: 4px; background: #eef5f0; }
 .care-rules-disclaimer { margin: 15px 0 0; color: #8290a0; font-size: 10px; line-height: 1.55; }
 
 /* Resident timelines are separate charts to keep meal, mobility, and sleep units clear. */
