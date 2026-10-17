@@ -443,3 +443,18 @@ export const MOCK_FOLLOW_UPS = [
     note: "Human review requested for the sustained changes shown in the observation history.",
   },
 ];
+
+// Centralized server-side tracking for early cognitive decline detection
+export const MOCK_QUESTION_LOGS: { 
+  residentId: string; 
+  timestamp: number 
+}[] = [];
+
+// Manual logs for family/caregivers to report observed memory lapses
+export const MOCK_MEMORY_LAPSES: {
+  id: string;
+  residentId: string;
+  reportedBy: string; // e.g., "family", "nurse", "care_aide"
+  note: string;
+  timestamp: number;
+}[] = [];
