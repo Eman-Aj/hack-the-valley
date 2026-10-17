@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+export const instant = false;
 import { notFound } from "next/navigation";
 import RouteHeader from "@/components/RouteHeader";
 import ResidentDetail from "@/components/ResidentDetail";
