@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Memory = {
   title: string;
@@ -34,12 +35,12 @@ const memories: Memory[] = [
   },
 ];
 
-export default function SeniorMemories({ onExit }: { onExit: () => void }) {
+export default function SeniorMemories() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
 
   return <section className={`senior-view ${activeMemory ? "has-active-memory" : ""}`}>
     {/* The senior view keeps one clear purpose: browse a memory or ask about it. */}
-    <button className="senior-exit-button" onClick={onExit}>← Exit memory book</button>
+    <Link className="senior-exit-button" href="/">← Home</Link>
     <header className="senior-welcome">
       <div className="senior-welcome-icon" aria-hidden="true">♡</div>
       <div><div className="section-kicker">NANCY&apos;S MEMORY BOOK</div><h2>Hello, Nancy</h2><p>Choose a memory to look at. You can ask about any picture.</p></div>

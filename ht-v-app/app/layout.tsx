@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CareThread | Person-centered care",
-  description: "A person-centered care handoff prototype for Nancy Wilson.",
+  title: "CareThread | Care that remembers the whole person",
+  description: "A person-centered memory and care handoff prototype for Nancy Wilson.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
