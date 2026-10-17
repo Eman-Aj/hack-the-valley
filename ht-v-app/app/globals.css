@@ -520,6 +520,124 @@ body {
 @media (max-width: 560px) {
   .home-header, .route-header { padding-right: 12px; padding-left: 12px; }
 }
+
+/* Full-bleed headers sit above the centered page content. */
+.home-header, .route-header {
+  position: relative;
+  left: 50vw;
+  width: 100vw;
+  max-width: none;
+  padding-right: max(24px, calc((100vw - 1150px) / 2));
+  padding-left: max(24px, calc((100vw - 1150px) / 2));
+  transform: translateX(-50%);
+  background: linear-gradient(105deg, #402f2c 0%, #594039 48%, #704936 100%);
+}
+.home-page, .route-page {
+  background:
+    radial-gradient(ellipse at 12% 8%, rgb(255 244 213 / 74%), transparent 36rem),
+    radial-gradient(ellipse at 88% 42%, rgb(230 192 137 / 22%), transparent 42rem),
+    linear-gradient(145deg, #f8efd9 0%, #f1e3c7 54%, #f8ecd2 100%);
+}
+
+/* Soft liquid-glass finish for the two large home demo buttons. */
+.home-destination {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgb(255 255 255 / 78%);
+  background: linear-gradient(145deg, rgb(255 250 232 / 78%), rgb(250 230 188 / 58%));
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 82%), 0 12px 30px rgb(105 75 42 / 9%);
+}
+.home-destination::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(128deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 14%) 30%, transparent 58%);
+  content: "";
+  pointer-events: none;
+}
+.home-destination::after {
+  position: absolute;
+  z-index: 0;
+  top: -55%;
+  right: -20%;
+  width: 72%;
+  height: 110%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(255 255 255 / 32%), transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+.home-destination > * { position: relative; z-index: 1; }
+.home-destination:hover {
+  border-color: rgb(255 255 255 / 95%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), 0 17px 34px rgb(105 75 42 / 14%);
+}
+.home-destination:focus-visible { outline-color: #9b5b35; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .home-destination { transition: none; }
+}
+
+/* Let the site-wide color wash reach the viewport edges behind centered content. */
+html {
+  min-height: 100%;
+  background: #f3e7cd;
+}
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 8% 4%, rgb(255 244 210 / 92%), transparent 35rem),
+    radial-gradient(ellipse at 88% 28%, rgb(225 173 112 / 30%), transparent 43rem),
+    radial-gradient(ellipse at 44% 100%, rgb(255 239 201 / 78%), transparent 42rem),
+    linear-gradient(135deg, #f5e9cd 0%, #ead6ad 52%, #f3e4c4 100%);
+  background-attachment: fixed;
+}
+.home-page, .route-page { background: transparent; }
+
+/* Warm frosted glass on the two role-selection cards. */
+.home-destination {
+  border: 1px solid rgb(255 255 255 / 72%);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgb(255 249 231 / 48%), rgb(239 219 183 / 32%));
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
+  backdrop-filter: blur(24px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 92%),
+    inset 1px 0 0 rgb(255 255 255 / 58%),
+    inset 0 -1px 0 rgb(156 114 69 / 12%),
+    0 18px 40px rgb(91 65 39 / 13%);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+.home-destination::before {
+  border: 1px solid rgb(255 255 255 / 32%);
+  border-radius: inherit;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 56%) 0%, rgb(255 255 255 / 21%) 24%, transparent 52%),
+    linear-gradient(180deg, rgb(255 250 236 / 13%), transparent 48%, rgb(206 166 111 / 7%));
+}
+.home-destination::after {
+  top: -45%;
+  right: -19%;
+  width: 82%;
+  height: 85%;
+  background: radial-gradient(ellipse, rgb(255 255 255 / 38%), rgb(255 255 255 / 8%) 38%, transparent 72%);
+  filter: blur(8px);
+}
+.home-destination:hover {
+  transform: translateY(-4px);
+  border-color: rgb(255 255 255 / 92%);
+  background: linear-gradient(145deg, rgb(255 251 237 / 58%), rgb(245 224 187 / 40%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 98%),
+    inset 1px 0 0 rgb(255 255 255 / 68%),
+    0 23px 48px rgb(91 65 39 / 18%);
+}
+@supports not ((backdrop-filter: blur(1px))) {
+  .home-destination { background: linear-gradient(145deg, #fff8e8, #f5e3bd); }
+}
 .home-header, .route-header { border-color: #d9e5f5; }
 .home-destination, .panel, .senior-memory-card, .memory-chat-panel, .signal-modal {
   background: linear-gradient(145deg, #fffdf9 0%, #fff5e9 100%);
@@ -1087,4 +1205,280 @@ body { font-size: 15px; }
 @media (max-width: 560px) {
   .voice-recorder-control, .voice-recorder-memory-question .voice-recorder-button { width: 100%; }
   .voice-recorder-memory-question .voice-recorder-button { justify-content: center; }
+}
+
+/* Keep the shared navigation at the very top on focused senior pages too. */
+.senior-route:has(> .route-header) { padding-top: 0; }
+.senior-route > .route-header { left: 50vw; margin-bottom: 0; }
+.senior-view { margin-top: 13px; }
+.senior-family-link {
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 0;
+  color: #76583e;
+  font-size: 14px;
+}
+.senior-family-link a {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid #d6aa66;
+  border-radius: 15px;
+  color: #60412e;
+  background: linear-gradient(135deg, #fff7df, #f2d587);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 85%), 0 5px 15px rgb(91 65 39 / 9%);
+  text-decoration: none;
+}
+.senior-family-link a:hover { background: linear-gradient(135deg, #fff4d1, #edca6c); }
+
+/* Larger memory frames and a soft story panel that opens in step with the image. */
+.senior-memory-card { height: 116svh; min-height: 700px; max-height: 1040px; }
+.senior-memory-visual { top: 50%; border-radius: 25px; }
+.senior-memory-content {
+  right: 4%;
+  bottom: 4vh;
+  left: 4%;
+  max-height: 178px;
+  padding: 15px 21px 14px;
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 19px;
+  background: linear-gradient(125deg, rgb(255 248 225 / 94%), rgb(250 231 187 / 91%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), 0 12px 28px rgb(81 58 36 / 11%);
+  -webkit-backdrop-filter: blur(13px);
+  backdrop-filter: blur(13px);
+  transition: max-height .16s linear, opacity .16s linear, transform .16s linear;
+}
+.senior-memory-content .senior-memory-date { display: block; margin-bottom: 4px; color: #8b633c; font-size: 13px; }
+.senior-memory-content h3 { display: block; margin: 0 0 5px; color: #493832; font-size: clamp(22px, 2.6vw, 30px); }
+.senior-memory-content > p { margin: 0; color: #624f41; font-size: clamp(16px, 1.7vw, 19px); line-height: 1.48; }
+.senior-memory-caption { min-height: 66px; padding-right: 22px; padding-left: 22px; }
+@media (max-width: 1050px) {
+  .senior-memory-card { height: 108svh; min-height: 650px; }
+  .senior-memory-content { right: 1%; left: 1%; }
+}
+@media (max-width: 560px) {
+  .senior-family-link { justify-content: space-between; gap: 8px; font-size: 12px; }
+  .senior-family-link a { min-height: 42px; padding: 0 12px; }
+  .senior-memory-card { height: 108svh; min-height: 620px; }
+  .senior-memory-content { right: 0; left: 0; padding: 13px 15px 12px; }
+  .senior-memory-content h3 { font-size: 22px; }
+  .senior-memory-content > p { font-size: 16px; }
+}
+
+/* Full-bleed headers use normal flow margins, not relative offsets, so they
+   stay centered in every page shell (including the padded senior layout). */
+.home-header, .route-header {
+  position: relative;
+  left: auto;
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: 0;
+  transform: none;
+}
+.senior-route.memories-route, .senior-route.ask-story-route { padding-top: 0; }
+.senior-route > .route-header { left: auto; margin-top: 0; }
+.route-header-right a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid rgb(255 231 183 / 38%);
+  border-radius: 999px;
+  background: rgb(255 245 220 / 11%);
+  transition: background .16s ease, border-color .16s ease;
+}
+.route-header-right a:hover, .route-header-right a:focus-visible {
+  border-color: rgb(255 231 183 / 68%);
+  background: rgb(255 245 220 / 20%);
+}
+.senior-view > .senior-exit-button { display: none; }
+
+/* Full photos render above the scrolling card stack, so transformed card
+   ancestors cannot clip the lightbox. */
+.memory-photo-lightbox { z-index: 1000; }
+.memory-photo-lightbox-content { width: min(96vw, 1500px); max-width: none; max-height: 96dvh; }
+.memory-photo-lightbox-content img {
+  width: auto;
+  height: auto;
+  max-width: min(94vw, 1440px);
+  max-height: 86dvh;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Reveal the entire story text as its card approaches; don't impose a fixed
+   height cap that cuts off longer descriptions. */
+.senior-memory-content {
+  max-height: none;
+  overflow: hidden;
+  transition: opacity .14s linear, transform .14s linear;
+}
+.memory-chat-panel { scroll-padding-top: 74px; }
+.memory-chat-heading {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  box-shadow: 0 4px 12px rgb(80 57 35 / 8%);
+}
+.memory-chat-close { flex: 0 0 40px; }
+
+/* The senior memory page follows the warm home palette instead of the old
+   blue coastal surfaces. */
+.senior-route.memories-route {
+  background: transparent;
+  color: #493832;
+}
+.memories-route .senior-welcome {
+  border-color: #e8d5ad;
+  background: linear-gradient(125deg, #fff6db, #f4e0b1 72%, #f1d59a);
+  box-shadow: 0 8px 24px rgb(93 65 39 / 8%);
+}
+.memories-route .senior-welcome-icon,
+.memories-route .memory-chat-icon {
+  color: #714a2f;
+  background: linear-gradient(145deg, #f8dc86, #edc66a);
+}
+.memories-route .senior-welcome h2,
+.memories-route .memory-chat-heading h3,
+.memories-route .senior-memory-content h3 { color: #493832; }
+.memories-route .senior-welcome p,
+.memories-route .senior-memory-content > p { color: #624f41; }
+.memories-route .senior-ask-story-link {
+  border-color: #d6aa66;
+  color: #60412e;
+  background: linear-gradient(135deg, #fff7df, #f2d587);
+}
+.memories-route .senior-family-link {
+  border-color: #ead7af;
+  color: #76583e;
+  background: linear-gradient(125deg, #fff6db, #f5e4be);
+}
+.memories-route .senior-end-note { color: #806449; }
+.memories-route .senior-memory-visual {
+  overflow: hidden;
+  border-color: rgb(255 255 255 / 86%);
+  background: linear-gradient(135deg, #ead4a8, #f4e7c9 52%, #d9b783);
+  box-shadow: 0 18px 46px rgb(87 59 35 / 18%);
+}
+.memories-route .senior-memory-image.senior-art-theo,
+.memories-route .senior-memory-image.senior-art-dinner,
+.memories-route .senior-memory-image.senior-art-lake {
+  background: linear-gradient(145deg, #f7e2a8, #eed3a0 54%, #d99c63);
+}
+.memories-route .senior-hill-one,
+.memories-route .senior-art-dinner .senior-hill-one { background: #c88e5a; }
+.memories-route .senior-hill-two,
+.memories-route .senior-art-dinner .senior-hill-two { background: #8a6348; }
+.memories-route .senior-art-lake .senior-hill-one { background: #d2a56b; }
+.memories-route .senior-art-lake .senior-hill-two { background: #9b7654; }
+.memories-route .memory-chat-panel {
+  border-color: #e5d0a7;
+  background: linear-gradient(145deg, #fff8e6, #f8e9c7);
+  box-shadow: 0 16px 42px rgb(81 58 36 / 18%);
+}
+.memories-route .memory-chat-heading {
+  border-color: #e8d5ad;
+  background: linear-gradient(110deg, #f8e8b9, #fff2d1 62%, #f3d89b);
+}
+.memories-route .memory-chat-close {
+  border-color: #dfc99e;
+  color: #5c4030;
+  background: #fff7e3;
+}
+.memories-route .memory-chat-context,
+.memories-route .memory-chat-answer { background: #fff3d8; }
+.memories-route .memory-chat-question { background: #f5e1ae; }
+.memories-route .memory-chat-voice {
+  border-color: #ead8b2;
+  background: linear-gradient(125deg, #fff5dd, #f6e4bd);
+}
+.memories-route .voice-recorder-memory-question .voice-recorder-button {
+  border-color: #dfbd7d;
+  color: #67472e;
+  background: linear-gradient(110deg, #fff8e6, #f5e2b6 75%, #f0ce91);
+}
+.memories-route .memory-chat-suggestions button {
+  border-color: #dec28f;
+  color: #68482f;
+  background: #fff8e8;
+}
+.memories-route .senior-ask-button,
+.memories-route .senior-speak-button {
+  border-color: #dfb66f;
+  color: #60412e;
+  background: linear-gradient(135deg, #fff8e6, #f5df9e 78%, #efc887);
+  box-shadow: 0 10px 25px rgb(91 65 39 / 14%);
+}
+.memories-route .senior-ask-button:hover,
+.memories-route .senior-speak-button:hover,
+.memories-route .senior-speak-button.is-playing {
+  border-color: #c98549;
+  background: linear-gradient(135deg, #fff5d9, #f4d77f 78%, #e9b875);
+}
+
+/* Use the whole frame for a calm ambient fill while preserving the complete
+   photo, at its natural aspect ratio, in the foreground. */
+.senior-memory-card { height: 100svh; min-height: 640px; max-height: 900px; }
+.memory-photo-trigger-senior .memory-photo-ambient {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+.senior-memory-visual .memory-photo-trigger .memory-photo-ambient img {
+  position: absolute;
+  inset: -7%;
+  width: 114%;
+  height: 114%;
+  max-height: none;
+  object-fit: cover;
+  filter: blur(28px) brightness(.78) saturate(.8);
+  opacity: .74;
+  transform: scale(1.03);
+}
+.senior-memory-visual .memory-photo-trigger .memory-photo-foreground {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  transform: none;
+  filter: none;
+  transition: transform .24s ease;
+}
+.senior-memory-visual .memory-photo-trigger:hover .memory-photo-foreground,
+.senior-memory-visual .memory-photo-trigger:focus-visible .memory-photo-foreground {
+  transform: scale(1.035);
+  filter: none;
+}
+.senior-memory-card .senior-memory-content {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  clip-path: inset(100% 0 0 0 round 19px);
+  transition: clip-path .14s linear, opacity .14s linear, transform .14s linear;
+  border-color: rgb(255 255 255 / 88%);
+  background: linear-gradient(125deg, rgb(255 248 225 / 97%), rgb(250 231 187 / 95%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 96%), 0 14px 32px rgb(81 58 36 / 14%);
+}
+.senior-memory-card .senior-memory-content h3 { font-size: clamp(24px, 2.5vw, 30px); line-height: 1.22; }
+.senior-memory-card .senior-memory-content > p { overflow: visible; }
+.senior-memory-card.is-centered .senior-memory-content h3,
+.senior-memory-card:focus-within .senior-memory-content h3 { font-size: clamp(24px, 2.5vw, 30px); line-height: 1.22; }
+@media (max-width: 1050px) {
+  .senior-memory-card { height: 100svh; min-height: 600px; }
+}
+@media (max-width: 560px) {
+  .senior-memory-card { height: 100svh; min-height: 560px; }
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import type { MemoryEntry } from "../lib/types";
 import { readSavedMemories } from "../lib/memory-storage";
@@ -47,7 +46,6 @@ const memories: Memory[] = [
 export default function SeniorMemories() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
   const [familyMemories, setFamilyMemories] = useState<Memory[]>([]);
-  const [imageRatios, setImageRatios] = useState<Record<string, number>>({});
   const [speechMemoryId, setSpeechMemoryId] = useState<string | null>(null);
   const [speechStatus, setSpeechStatus] = useState<"idle" | "loading" | SpeechPlaybackState>("idle");
 
@@ -77,14 +75,18 @@ export default function SeniorMemories() {
           const approach = Math.max(0, 1 - Math.abs(cardCenter - viewportCenter) / travel);
           const progress = approach * approach * (3 - 2 * approach);
           const visual = card.querySelector<HTMLElement>(".senior-memory-visual");
-          const ratio = Number(visual?.dataset.aspectRatio) || 1.45;
-          const maxHeight = Math.max(1, Math.min(window.innerHeight * 0.54, 580, card.clientWidth / ratio));
-          const minHeight = Math.min(270, maxHeight);
+          const maxHeight = Math.max(1, Math.min(window.innerHeight * 0.56, 680));
+          const minHeight = Math.min(330, maxHeight);
           const imageHeight = minHeight + (maxHeight - minHeight) * progress;
-          const imageWidth = imageHeight * ratio;
           card.style.setProperty("--memory-progress", progress.toFixed(3));
           visual?.style.setProperty("height", `${Math.round(imageHeight)}px`);
-          visual?.style.setProperty("width", `${Math.round(imageWidth)}px`);
+          visual?.style.setProperty("width", `${Math.round(card.clientWidth)}px`);
+          const content = card.querySelector<HTMLElement>(".senior-memory-content");
+          const contentProgress = card.matches(":focus-within") ? 1 : progress;
+          const detailProgress = contentProgress > 0.92 ? 1 : contentProgress;
+          content?.style.setProperty("opacity", `${Math.max(0, Math.min(1, (detailProgress - 0.08) / 0.72))}`);
+          content?.style.setProperty("transform", `translateY(${Math.round((1 - detailProgress) * 12)}px)`);
+          content?.style.setProperty("clip-path", `inset(${Math.round((1 - detailProgress) * 100)}% 0 0 0 round 19px)`);
           card.classList.toggle("is-centered", progress >= 0.62);
         }
       });
@@ -93,7 +95,7 @@ export default function SeniorMemories() {
     window.addEventListener("scroll", updateFocus, { passive: true });
     window.addEventListener("resize", updateFocus);
     return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", updateFocus); window.removeEventListener("resize", updateFocus); };
-  }, [familyMemories, imageRatios]);
+  }, [familyMemories]);
 
   useEffect(() => () => stopSpeaking(), []);
 
@@ -118,7 +120,7 @@ export default function SeniorMemories() {
 
   return <section className={`senior-view ${activeMemory ? "has-active-memory" : ""}`}>
     {/* The senior view keeps one clear purpose: browse a memory or ask about it. */}
-    <Link className="senior-exit-button" href="/">← Home</Link>
+    <div className="senior-family-link"><span>For Nancy&apos;s family</span><Link href="/family-memories">↑ Upload or review a memory</Link></div>
     <header className="senior-welcome">
       <div className="senior-welcome-icon" aria-hidden="true">♡</div>
       <div><div className="section-kicker">NANCY&apos;S MEMORY BOOK</div><h2>Hello, Nancy</h2><p>Choose a memory to look at. You can ask about any picture.</p></div>
@@ -129,12 +131,11 @@ export default function SeniorMemories() {
       <div className="senior-memory-list">
         {allMemories.map((memory, index) => <article className={`senior-memory-card ${activeMemory?.title === memory.title ? "is-active" : ""}`} key={memory.id ?? memory.title} tabIndex={0} data-memory-index={index}>
           {/* A large picture placeholder leaves room for the real approved family photo. */}
-          <div className="senior-memory-visual" data-aspect-ratio={imageRatios[memory.id ?? memory.title] ?? 1.45} style={{ "--memory-ratio": imageRatios[memory.id ?? memory.title] ?? 1.45 } as CSSProperties}>
-            {memory.image ? <MemoryImageViewer src={memory.image} alt={memory.title} title={memory.title} imageClassName="senior-memory-image senior-memory-upload" variant="senior" onImageDimensions={(width, height) => { if (width && height) setImageRatios((current) => ({ ...current, [memory.id ?? memory.title]: width / height })); }}/> : <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
+          <div className="senior-memory-visual">
+            {memory.image ? <MemoryImageViewer src={memory.image} alt={memory.title} title={memory.title} imageClassName="senior-memory-image senior-memory-upload" variant="senior"/> : <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
               <span className="senior-sun"/><span className="senior-hill senior-hill-one"/><span className="senior-hill senior-hill-two"/>
               <span className="senior-photo-label">Family photo</span>
             </div>}
-            <div className="senior-memory-caption"><strong>{memory.title}</strong><span>{memory.date}</span></div>
           </div>
           <div className="senior-memory-content">
             <div className="senior-memory-date">{memory.date}</div>
@@ -158,7 +159,6 @@ export default function SeniorMemories() {
       {activeMemory && <MemoryQuestionPanel key={activeMemory.id ?? activeMemory.title} memory={activeMemory} onClose={() => setActiveMemory(null)} />}
     </div>
     <div className="senior-end-note"><span aria-hidden="true">♡</span> More memories are waiting below. Keep scrolling when you&apos;re ready.</div>
-    <div className="senior-family-link"><span>For Nancy&apos;s family</span><Link href="/family-memories">Add or review a memory →</Link></div>
   </section>;
 }
 

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { MOCK_MEMORIES } from "../lib/mock-db";
 import { readSavedMemories } from "../lib/memory-storage";
 import type { MemoryEntry } from "../lib/types";
+import RouteHeader from "./RouteHeader";
 
 export default function AskMyStory() {
   const [memories, setMemories] = useState<MemoryEntry[]>(MOCK_MEMORIES.filter((memory) => memory.residentId === "res_001" && memory.verificationStatus === "verified" && memory.sharingPermissions.visibleInAskMyStory));
@@ -45,7 +46,7 @@ export default function AskMyStory() {
     window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(answer));
   }
 
-  return <main className="senior-route ask-story-route"><div className="ask-story-page">
+  return <main className="senior-route ask-story-route"><RouteHeader section="Ask My Story"/><div className="ask-story-page">
     <Link className="senior-exit-button" href="/memories">← Memory book</Link>
     <header className="senior-welcome"><div className="senior-welcome-icon" aria-hidden="true">?</div><div><div className="section-kicker">NANCY&apos;S FAMILY MEMORIES</div><h2>Ask My Story</h2><p>Ask a question. Answers come from memories your family confirmed.</p></div></header>
     <section className="panel ask-story-main">
