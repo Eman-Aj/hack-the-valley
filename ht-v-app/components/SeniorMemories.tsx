@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import type { MemoryEntry } from "../lib/types";
 import { readSavedMemories } from "../lib/memory-storage";
+import { recordQuestionActivity } from "../lib/question-activity";
 import MemoryImageViewer from "./MemoryImageViewer";
 import { speakText, stopSpeaking, type SpeechPlaybackState } from "../lib/text-to-speech";
 import VoiceRecorderButton from "./VoiceRecorderButton";
@@ -169,6 +170,7 @@ function MemoryQuestionPanel({ memory, onClose }: { memory: Memory; onClose: () 
 
   async function askQuestion(value: string) {
     if (!value.trim()) return;
+    recordQuestionActivity("res_001");
     setQuestion(value.trim()); setAnswer(""); setAsking(true);
     try {
       if (!memory.verifiedMemory) { setAnswer(memory.story); return; }

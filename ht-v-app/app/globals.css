@@ -696,6 +696,25 @@ body {
 .memory-permission-list span { padding: 4px 6px; border-radius: 4px; background: #eef5f0; }
 .care-rules-disclaimer { margin: 15px 0 0; color: #8290a0; font-size: 10px; line-height: 1.55; }
 
+/* Question frequency is communication context for a human reviewer, not a health score. */
+.question-frequency-panel { margin: 0 0 16px; padding: 17px; border-color: #d8e4f3; }
+.question-frequency-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.question-frequency-heading h3 { margin: 0 0 4px; color: #30465d; font: 500 20px Georgia, serif; }
+.question-frequency-heading p { margin: 0; color: #75869a; font-size: 10px; }
+.question-frequency-total { color: #355472; font: 500 26px Georgia, serif; white-space: nowrap; }
+.question-frequency-total small { color: #8291a2; font: 500 10px Arial, sans-serif; }
+.question-frequency-chart { height: 105px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 9px; margin: 15px 0 12px; }
+.question-frequency-day { display: grid; grid-template-rows: 14px 1fr 16px; justify-items: center; gap: 4px; color: #8392a2; font-size: 9px; }
+.question-frequency-count { color: #526c88; font-size: 9px; font-weight: 700; }
+.question-frequency-bar-track { width: min(100%, 34px); height: 100%; display: flex; align-items: end; overflow: hidden; border-radius: 5px 5px 2px 2px; background: #f0f5fb; }
+.question-frequency-bar-track i { display: block; width: 100%; min-height: 3px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #82a6d0, #4c79b8); }
+.question-frequency-note { padding: 10px 12px; border-radius: 7px; background: #f2f7fc; }
+.question-frequency-note.is-increased { background: #fff3e5; }
+.question-frequency-note strong { color: #405b78; font-size: 10px; }
+.question-frequency-note.is-increased strong { color: #855c32; }
+.question-frequency-note p { margin: 4px 0 0; color: #6f8298; font-size: 9px; line-height: 1.5; }
+.question-frequency-disclaimer { margin: 9px 0 0; color: #8995a2; font-size: 8px; line-height: 1.45; }
+
 /* Resident timelines are separate charts to keep meal, mobility, and sleep units clear. */
 .resident-detail-top { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin-top: 4px; }
 .resident-detail-heading { display: flex; align-items: center; gap: 14px; margin: 13px 0 19px; }

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { MOCK_MEMORIES } from "../lib/mock-db";
 import { readSavedMemories } from "../lib/memory-storage";
 import type { MemoryEntry } from "../lib/types";
+import { recordQuestionActivity } from "../lib/question-activity";
 
 export default function AskMyStory() {
   const [memories, setMemories] = useState<MemoryEntry[]>(MOCK_MEMORIES.filter((memory) => memory.residentId === "res_001" && memory.verificationStatus === "verified" && memory.sharingPermissions.visibleInAskMyStory));
@@ -26,6 +27,7 @@ export default function AskMyStory() {
   async function askQuestion(value: string) {
     const prompt = value.trim();
     if (!prompt) return;
+    recordQuestionActivity("res_001");
     setQuestion(prompt); setAnswer(""); setError(""); setBusy(true); setSupported(null);
     try {
       const response = await fetch("/api/ask-story", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
