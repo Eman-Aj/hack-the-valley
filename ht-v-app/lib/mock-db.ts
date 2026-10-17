@@ -51,3 +51,16 @@ export const MOCK_MEMORIES: MemoryEntry[] = [
     sharingPermissions: { visibleInAskMyStory: true, includeInCareBrief: true },
   },
 ];
+
+import { CareObservation } from "./signal-engine"; // Add this import at the very top of mock-db.ts
+
+// Simulated health logs from the last 3 days
+export const MOCK_OBSERVATIONS: CareObservation[] = [
+  // Nancy's baseline for meals is 85. These low numbers (60, 50) will trigger a "needs_review" alert.
+  { date: "2026-10-15", type: "meal_intake", value: 60 },
+  { date: "2026-10-16", type: "meal_intake", value: 50 },
+  
+  // Robert's baseline for sleep disruption is 3. This (3, 2) is normal, so it will return "no_pattern_detected".
+  { date: "2026-10-15", type: "sleep_disruption", value: 3 },
+  { date: "2026-10-16", type: "sleep_disruption", value: 2 },
+];
