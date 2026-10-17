@@ -4,6 +4,7 @@ import type {
   CareObservation,
   ObservationType,
   ObservationSourceRole,
+  NursingNote,
 } from "./types";
 
 // All records below, including profile details, are fictional demonstration data.
@@ -19,6 +20,17 @@ export const MOCK_RESIDENTS: Resident[] = [
     pronouns: "She/her",
     diagnosis: "Moderate-stage Alzheimer's disease.",
     otherDiagnoses: [],
+    careProfile: {
+      facility: "Harbourview Senior Living",
+      unit: "Memory care",
+      room: "214",
+      facilityPhone: "(555) 010-0100",
+      primaryClinician: { name: "Dr. Maya Bennett", title: "MD", specialty: "Geriatric medicine", phone: "(555) 010-0110" },
+      familyContacts: [
+        { name: "David Wilson", relationship: "Son · primary contact", phone: "(555) 010-0120" },
+        { name: "Grace Wilson", relationship: "Daughter", phone: "(555) 010-0121" },
+      ],
+    },
     baseline: {
       meal_intake: 85,
       mobility_assistance: 2,
@@ -38,6 +50,17 @@ export const MOCK_RESIDENTS: Resident[] = [
     pronouns: "He/him",
     diagnosis: "Parkinson's disease with early-stage dementia.",
     otherDiagnoses: [],
+    careProfile: {
+      facility: "Harbourview Senior Living",
+      unit: "Garden wing",
+      room: "118",
+      facilityPhone: "(555) 010-0100",
+      primaryClinician: { name: "Dr. Aaron Patel", title: "MD", specialty: "Neurology", phone: "(555) 010-0130" },
+      familyContacts: [
+        { name: "Grace Miller", relationship: "Daughter · primary contact", phone: "(555) 010-0140" },
+        { name: "Peter Miller", relationship: "Son", phone: "(555) 010-0141" },
+      ],
+    },
     baseline: {
       meal_intake: 95,
       mobility_assistance: 0,
@@ -57,6 +80,17 @@ export const MOCK_RESIDENTS: Resident[] = [
     pronouns: "She/her",
     diagnosis: "Early-stage Alzheimer's disease.",
     otherDiagnoses: ["Osteoarthritis"],
+    careProfile: {
+      facility: "Willow Creek Residence",
+      unit: "Cedar neighborhood",
+      room: "306",
+      facilityPhone: "(555) 010-0200",
+      primaryClinician: { name: "Dr. Sofia Kim", title: "DO", specialty: "Family medicine", phone: "(555) 010-0210" },
+      familyContacts: [
+        { name: "Daniel Chen", relationship: "Spouse · primary contact", phone: "(555) 010-0220" },
+        { name: "Lily Chen", relationship: "Daughter", phone: "(555) 010-0221" },
+      ],
+    },
     baseline: {
       meal_intake: 80,
       mobility_assistance: 1,
@@ -76,6 +110,17 @@ export const MOCK_RESIDENTS: Resident[] = [
     pronouns: "He/him",
     diagnosis: "Vascular dementia.",
     otherDiagnoses: ["Type 2 diabetes"],
+    careProfile: {
+      facility: "Willow Creek Residence",
+      unit: "Maple neighborhood",
+      room: "221",
+      facilityPhone: "(555) 010-0200",
+      primaryClinician: { name: "Dr. Marcus Reed", title: "MD", specialty: "Internal medicine", phone: "(555) 010-0230" },
+      familyContacts: [
+        { name: "Elena Davis", relationship: "Wife · primary contact", phone: "(555) 010-0240" },
+        { name: "Jordan Davis", relationship: "Son", phone: "(555) 010-0241" },
+      ],
+    },
     baseline: {
       meal_intake: 90,
       mobility_assistance: 1,
@@ -95,6 +140,17 @@ export const MOCK_RESIDENTS: Resident[] = [
     pronouns: "She/her",
     diagnosis: "Moderate-stage mixed dementia.",
     otherDiagnoses: ["COPD"],
+    careProfile: {
+      facility: "Meadowbrook Care Home",
+      unit: "Willow wing",
+      room: "107",
+      facilityPhone: "(555) 010-0300",
+      primaryClinician: { name: "Dr. Priya Shah", title: "MD", specialty: "Geriatric medicine", phone: "(555) 010-0310" },
+      familyContacts: [
+        { name: "Thomas Brooks", relationship: "Son · primary contact", phone: "(555) 010-0320" },
+        { name: "Nina Brooks", relationship: "Daughter", phone: "(555) 010-0321" },
+      ],
+    },
     baseline: {
       meal_intake: 80,
       mobility_assistance: 2,
@@ -114,6 +170,17 @@ export const MOCK_RESIDENTS: Resident[] = [
     pronouns: "He/him",
     diagnosis: "Dementia with Lewy bodies.",
     otherDiagnoses: ["Congestive heart failure"],
+    careProfile: {
+      facility: "Meadowbrook Care Home",
+      unit: "Garden wing",
+      room: "125",
+      facilityPhone: "(555) 010-0300",
+      primaryClinician: { name: "Dr. Elena Torres", title: "MD", specialty: "Neurology", phone: "(555) 010-0330" },
+      familyContacts: [
+        { name: "Asha Patel", relationship: "Daughter · primary contact", phone: "(555) 010-0340" },
+        { name: "Ravi Patel", relationship: "Son", phone: "(555) 010-0341" },
+      ],
+    },
     baseline: {
       meal_intake: 85,
       mobility_assistance: 1,
@@ -309,6 +376,15 @@ function buildObservations(series: ResidentSeries): CareObservation[] {
 
 export const MOCK_OBSERVATIONS: CareObservation[] =
   RESIDENT_SERIES.flatMap(buildObservations);
+
+export const MOCK_NURSING_NOTES: NursingNote[] = [
+  { id: "nursing_res_001_1", residentId: "res_001", recordedAt: "2026-10-17T09:10:00", category: "cognition_orientation", note: "Asked twice when her son would visit. Reviewed the family visit note and date together; she appeared reassured and joined the morning activity.", recordedBy: "Maya Chen", recordedByRole: "nurse" },
+  { id: "nursing_res_002_1", residentId: "res_002", recordedAt: "2026-10-17T09:25:00", category: "communication", note: "Needed extra time to respond to questions during morning check-in. One question at a time and a quiet setting supported conversation.", recordedBy: "Jordan Lee", recordedByRole: "licensed_practical_nurse" },
+  { id: "nursing_res_003_1", residentId: "res_003", recordedAt: "2026-10-17T10:00:00", category: "mood_behavior", note: "Became unsettled when the activity room was busier than usual. Offered a quieter seat and familiar music; she chose to stay and appeared more comfortable.", recordedBy: "Avery Moore", recordedByRole: "nurse" },
+  { id: "nursing_res_004_1", residentId: "res_004", recordedAt: "2026-10-17T10:20:00", category: "safety", note: "Paused at the corridor junction and asked which way led to his room. Walked alongside him and pointed out the familiar room sign; arrived without incident.", recordedBy: "Taylor Reed", recordedByRole: "care_aide" },
+  { id: "nursing_res_005_1", residentId: "res_005", recordedAt: "2026-10-17T10:45:00", category: "personal_care", note: "Needed a verbal cue to begin the usual morning grooming routine. Offered one step at a time and privacy; she completed the routine with time and encouragement.", recordedBy: "Morgan Price", recordedByRole: "nurse" },
+  { id: "nursing_res_006_1", residentId: "res_006", recordedAt: "2026-10-17T11:05:00", category: "communication", note: "Conversation was easier to follow face-to-face in a quiet space. Used short sentences, allowed pauses, and confirmed his preference before moving on.", recordedBy: "Casey Patel", recordedByRole: "licensed_practical_nurse" },
+];
 
 export const MOCK_SCENARIOS = [
   {

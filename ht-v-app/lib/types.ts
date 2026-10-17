@@ -9,7 +9,11 @@ export type ObservationSourceRole =
   | "care_aide"
   | "overnight_staff"
   | "care_partner"
-  | "nurse";
+  | "nurse"
+  | "licensed_practical_nurse"
+  | "physician";
+
+export type CareTeamRole = ObservationSourceRole;
 
 export interface CareObservation {
   id: string;
@@ -18,7 +22,26 @@ export interface CareObservation {
   type: ObservationType;
   value: number;
   sourceRole: ObservationSourceRole;
+  recordedBy?: string;
   sourceNote: string;
+}
+
+export type NursingNoteCategory =
+  | "cognition_orientation"
+  | "communication"
+  | "mood_behavior"
+  | "personal_care"
+  | "safety"
+  | "other";
+
+export interface NursingNote {
+  id: string;
+  residentId: string;
+  recordedAt: string;
+  category: NursingNoteCategory;
+  note: string;
+  recordedBy: string;
+  recordedByRole: CareTeamRole;
 }
 
 export interface InteractionOutcome {
@@ -26,11 +49,30 @@ export interface InteractionOutcome {
   residentId: string;
   timestamp: string;
   caregiverId: string;
+  caregiverRole?: CareTeamRole;
   actionRecorded: string;
   observedResponse: string;
   followUpRequired: boolean;
   followUpNotes: string;
   relatedMemoryId?: string;
+}
+
+export interface ResidentCareProfile {
+  facility: string;
+  unit: string;
+  room: string;
+  facilityPhone: string;
+  primaryClinician: {
+    name: string;
+    title: string;
+    specialty: string;
+    phone: string;
+  };
+  familyContacts: {
+    name: string;
+    relationship: string;
+    phone: string;
+  }[];
 }
 
 export interface Resident {
@@ -42,6 +84,7 @@ export interface Resident {
   pronouns?: string;
   diagnosis?: string;
   otherDiagnoses?: string[];
+  careProfile?: ResidentCareProfile;
   baseline: {
     meal_intake: number;
     mobility_assistance: number;
