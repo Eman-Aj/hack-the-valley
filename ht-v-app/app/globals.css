@@ -705,7 +705,7 @@ body {
 .home-destinations-two { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 930px; margin-right: auto; margin-left: auto; }
 .home-destinations-two .home-destination { min-height: 255px; }
 .care-dashboard-heading { margin-top: 13px; }
-.care-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+.care-summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
 .care-summary-card { min-height: 126px; padding: 16px; border-color: #dce7f4; }
 .care-summary-card > span, .care-summary-card > small { display: block; }
 .care-summary-card > span { color: #667c95; font-size: 12px; font-weight: 700; }
@@ -715,11 +715,12 @@ body {
 .summary-review > strong { color: #a36b3d; }
 .summary-monitor { background: linear-gradient(145deg, #f7faff, #e9f1fc); }
 .summary-quiet { background: linear-gradient(145deg, #fafdff, #eef5fb); }
+.summary-stable { background: linear-gradient(145deg, #f5fbf7, #eaf5ee); }
 .resident-list-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 12px; }
 .resident-list-heading h3 { margin: 0; color: #30465d; font: 500 21px Georgia, serif; }
 .resident-list-heading > span { color: #8291a2; font-size: 10px; }
 .care-resident-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
-.care-resident-card { display: block; min-height: 204px; padding: 15px; color: inherit; text-decoration: none; border-color: #d9e5f4; transition: transform .16s ease, box-shadow .16s ease; }
+.care-resident-card { display: block; min-height: 204px; padding: 15px; color: inherit; border-color: #d9e5f4; transition: transform .16s ease, box-shadow .16s ease; }
 .care-resident-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgb(48 70 93 / 9%); }
 .care-resident-card-top { display: flex; align-items: center; justify-content: space-between; }
 .care-resident-avatar { display: block; width: 48px; height: 48px; flex: 0 0 48px; overflow: hidden; border: 1px solid rgb(64 94 128 / 12%); }
@@ -805,8 +806,32 @@ body {
 .resident-domain-summary b { color: #5d7087; font-size: 9px; font-weight: 600; }
 .domain-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #7796bd; }
 .domain-meal_intake { background: #4c79b8; }.domain-mobility_assistance { background: #bd7c42; }.domain-sleep_disruption { background: #588c7d; }
-.care-resident-link { display: flex; justify-content: space-between; margin-top: 11px; color: #466b9e; font-size: 10px; font-weight: 700; }
+.care-resident-actions { display: flex; flex-wrap: wrap; gap: 5px 16px; }
+.care-resident-link { display: flex; justify-content: space-between; margin-top: 11px; color: #466b9e; font-size: 10px; font-weight: 700; text-decoration: none; }
+.care-resident-link:hover { text-decoration: underline; }
+.memory-record-facts { min-height: 0 !important; margin: 0 0 9px !important; color: #687d94 !important; }
+.memory-permission-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; color: #607a69; font-size: 8px; font-weight: 700; }
+.memory-permission-list span { padding: 4px 6px; border-radius: 4px; background: #eef5f0; }
 .care-rules-disclaimer { margin: 15px 0 0; color: #8290a0; font-size: 10px; line-height: 1.55; }
+
+/* Question frequency is communication context for a human reviewer, not a health score. */
+.question-frequency-panel { margin: 0 0 16px; padding: 17px; border-color: #d8e4f3; }
+.question-frequency-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.question-frequency-heading h3 { margin: 0 0 4px; color: #30465d; font: 500 20px Georgia, serif; }
+.question-frequency-heading p { margin: 0; color: #75869a; font-size: 10px; }
+.question-frequency-total { color: #355472; font: 500 26px Georgia, serif; white-space: nowrap; }
+.question-frequency-total small { color: #8291a2; font: 500 10px Arial, sans-serif; }
+.question-frequency-chart { height: 105px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 9px; margin: 15px 0 12px; }
+.question-frequency-day { display: grid; grid-template-rows: 14px 1fr 16px; justify-items: center; gap: 4px; color: #8392a2; font-size: 9px; }
+.question-frequency-count { color: #526c88; font-size: 9px; font-weight: 700; }
+.question-frequency-bar-track { width: min(100%, 34px); height: 100%; display: flex; align-items: end; overflow: hidden; border-radius: 5px 5px 2px 2px; background: #f0f5fb; }
+.question-frequency-bar-track i { display: block; width: 100%; min-height: 3px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #82a6d0, #4c79b8); }
+.question-frequency-note { padding: 10px 12px; border-radius: 7px; background: #f2f7fc; }
+.question-frequency-note.is-increased { background: #fff3e5; }
+.question-frequency-note strong { color: #405b78; font-size: 10px; }
+.question-frequency-note.is-increased strong { color: #855c32; }
+.question-frequency-note p { margin: 4px 0 0; color: #6f8298; font-size: 9px; line-height: 1.5; }
+.question-frequency-disclaimer { margin: 9px 0 0; color: #8995a2; font-size: 8px; line-height: 1.45; }
 
 /* Resident timelines are separate charts to keep meal, mobility, and sleep units clear. */
 .resident-detail-top { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin-top: 4px; }

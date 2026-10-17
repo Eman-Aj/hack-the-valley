@@ -12,6 +12,7 @@ import ResidentClinicalSummary from "./ResidentClinicalSummary";
 import ResidentNursingNotes from "./ResidentNursingNotes";
 import useCareNursingNotes from "./useCareNursingNotes";
 import type { CareObservation, CareTeamRole, ObservationType, Resident, SignalStatus } from "../lib/types";
+import QuestionFrequencyPanel from "./QuestionFrequencyPanel";
 
 const domains: { id: ObservationType; title: string; unit: string; max: number; color: string; baselineLabel: (value: number) => string; valueLabel: (value: number) => string }[] = [
   { id: "meal_intake", title: "Meal intake", unit: "%", max: 100, color: "#4c79b8", baselineLabel: (v) => `${v}% baseline`, valueLabel: (v) => `${v}%` },
@@ -103,6 +104,7 @@ export default function ResidentDetail({ resident }: { resident: Resident }) {
       {!isNancySeedWindow && signal.windowDates.length > 0 && <p className="window-update-note">Signal window uses the resident&apos;s latest recorded dates: {signal.windowDates.map(displayDate).join(", ")}. New records update this window.</p>}
     </section>
     <ResidentNursingNotes resident={resident} notes={residentNursingNotes} allowEntry/>
+    <QuestionFrequencyPanel residentId={resident.id} residentName={resident.preferredName}/>
     <section className="panel observation-form-panel"><div className="panel-heading"><div><div className="section-kicker">FICTIONAL DEMO DATA ENTRY</div><h3>Add an observation</h3><p>Save a confirmed record to update the timeline and recalculate the rule signal immediately.</p></div></div>
       <form className="observation-entry-form" onSubmit={submitObservation}>
         <label>Date for all three records<input type="date" value={date} min="2026-10-10" onChange={(event) => setDate(event.target.value)} required/></label>

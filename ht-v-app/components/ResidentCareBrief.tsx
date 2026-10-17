@@ -13,6 +13,7 @@ import ResidentClinicalSummary from "./ResidentClinicalSummary";
 import ResidentNursingNotes from "./ResidentNursingNotes";
 import useCareNursingNotes from "./useCareNursingNotes";
 import type { CareObservation, CareTeamRole, InteractionOutcome, MemoryEntry, Resident } from "../lib/types";
+import QuestionFrequencyPanel from "./QuestionFrequencyPanel";
 
 const humanDate = (value: string) => new Date(`${value}T12:00:00`).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 const valueText = (observation: CareObservation) => observation.type === "meal_intake" ? `${observation.value}% meal intake` : observation.type === "mobility_assistance" ? `Mobility assistance level ${observation.value}/3` : `Sleep disruption level ${observation.value}/5`;
@@ -89,6 +90,7 @@ export default function ResidentCareBrief({ resident }: { resident: Resident }) 
       </section>
 
       <section className="panel brief-section observations-context-section"><div className="brief-section-heading"><span className="brief-section-number">02</span><div><div className="section-kicker">TIME-STAMPED CARE RECORDS</div><h3>Recent care observations</h3><p>Values in the current rule window are compared with {resident.preferredName}&apos;s baseline.</p></div><span className={`signal-status status-${signal.overallStatus}`}>{signal.overallStatus.replaceAll("_", " ")}</span></div>
+        <QuestionFrequencyPanel residentId={resident.id} residentName={resident.preferredName}/>
         <div className="brief-observation-list">{recentObservations.length ? recentObservations.map((observation) => <article className="brief-observation" key={observation.id}><span className={`domain-dot domain-${observation.type}`}/><div><strong>{valueText(observation)}</strong><p>{observation.sourceNote}</p><small>{humanDate(observation.date)} · Recorded by {observation.recordedBy ? `${observation.recordedBy}, ` : ""}{CARE_ROLE_LABELS[observation.sourceRole]}</small></div><span className="baseline-delta">Baseline {baselineText(observation, resident)}</span></article>) : <p className="brief-empty">No observations in the current review window.</p>}</div>
         <p className="brief-observation-disclaimer">The configured rules summarize recorded values for human review only. They do not diagnose, predict, or establish why a change occurred.</p>
         <Link href={`/caregiver/resident/${resident.id}`} className="brief-section-link">View all three timelines and supporting evidence →</Link>
