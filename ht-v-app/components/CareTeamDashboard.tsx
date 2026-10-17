@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { MOCK_RESIDENTS, MOCK_OBSERVATIONS } from "../lib/mock-db";
 import { evaluateHealthSignals } from "../lib/signal-engine";
 import { readCareObservations } from "../lib/care-demo-storage";
+import ResidentAvatar from "./ResidentAvatar";
+import ResidentClinicalSummary from "./ResidentClinicalSummary";
 import type { CareObservation, SignalStatus } from "../lib/types";
 
 const statusText: Record<SignalStatus, string> = {
@@ -36,8 +38,9 @@ export default function CareTeamDashboard() {
     <div className="resident-list-heading"><div><div className="section-kicker">RESIDENTS</div><h3>Choose a resident</h3></div><span>Signals from deterministic demo rules</span></div>
     <section className="care-resident-grid" aria-label="Residents">
       {summaries.map(({ resident, signal }) => <Link className="panel care-resident-card" href={`/caregiver/resident/${resident.id}`} key={resident.id}>
-        <div className="care-resident-card-top"><span className="avatar care-resident-avatar">{resident.preferredName.slice(0, 1)}{resident.displayName.split(" ")[1]?.slice(0, 1)}</span><span className={`signal-status status-${signal.overallStatus}`}>{statusText[signal.overallStatus]}</span></div>
+        <div className="care-resident-card-top"><ResidentAvatar resident={resident}/><span className={`signal-status status-${signal.overallStatus}`}>{statusText[signal.overallStatus]}</span></div>
         <h4>{resident.displayName}</h4><p>Prefers {resident.preferredName} · Fictional profile</p>
+        <ResidentClinicalSummary resident={resident} compact/>
         <div className="resident-domain-summary">{(["meal_intake", "mobility_assistance", "sleep_disruption"] as const).map((domain) => <span key={domain}><i className={`domain-dot domain-${domain}`}/>{domain === "meal_intake" ? "Meals" : domain === "mobility_assistance" ? "Mobility" : "Sleep"}<b>{statusText[signal.details[domain].status]}</b></span>)}</div>
         <span className="care-resident-link">Open resident detail <b aria-hidden="true">→</b></span>
       </Link>)}

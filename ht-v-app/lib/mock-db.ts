@@ -6,14 +6,19 @@ import type {
   ObservationSourceRole,
 } from "./types";
 
-// All records below are fictional demonstration data.
-// Values and patterns are not clinically validated.
+// All records below, including profile details, are fictional demonstration data.
+// Values, diagnoses, and patterns are not clinically validated.
 
 export const MOCK_RESIDENTS: Resident[] = [
   {
     id: "res_001",
     displayName: "Nancy Wilson",
     preferredName: "Nancy",
+    age: 78,
+    gender: "Female",
+    pronouns: "She/her",
+    diagnosis: "Moderate-stage Alzheimer's disease.",
+    otherDiagnoses: [],
     baseline: {
       meal_intake: 85,
       mobility_assistance: 2,
@@ -28,6 +33,11 @@ export const MOCK_RESIDENTS: Resident[] = [
     id: "res_002",
     displayName: "Robert Miller",
     preferredName: "Bob",
+    age: 82,
+    gender: "Male",
+    pronouns: "He/him",
+    diagnosis: "Parkinson's disease with early-stage dementia.",
+    otherDiagnoses: [],
     baseline: {
       meal_intake: 95,
       mobility_assistance: 0,
@@ -42,6 +52,11 @@ export const MOCK_RESIDENTS: Resident[] = [
     id: "res_003",
     displayName: "Margaret Chen",
     preferredName: "Margaret",
+    age: 75,
+    gender: "Female",
+    pronouns: "She/her",
+    diagnosis: "Early-stage Alzheimer's disease.",
+    otherDiagnoses: ["Osteoarthritis"],
     baseline: {
       meal_intake: 80,
       mobility_assistance: 1,
@@ -56,6 +71,11 @@ export const MOCK_RESIDENTS: Resident[] = [
     id: "res_004",
     displayName: "George Davis",
     preferredName: "George",
+    age: 81,
+    gender: "Male",
+    pronouns: "He/him",
+    diagnosis: "Vascular dementia.",
+    otherDiagnoses: ["Type 2 diabetes"],
     baseline: {
       meal_intake: 90,
       mobility_assistance: 1,
@@ -70,6 +90,11 @@ export const MOCK_RESIDENTS: Resident[] = [
     id: "res_005",
     displayName: "Evelyn Brooks",
     preferredName: "Evelyn",
+    age: 79,
+    gender: "Female",
+    pronouns: "She/her",
+    diagnosis: "Moderate-stage mixed dementia.",
+    otherDiagnoses: ["COPD"],
     baseline: {
       meal_intake: 80,
       mobility_assistance: 2,
@@ -84,6 +109,11 @@ export const MOCK_RESIDENTS: Resident[] = [
     id: "res_006",
     displayName: "Samuel Patel",
     preferredName: "Sam",
+    age: 77,
+    gender: "Male",
+    pronouns: "He/him",
+    diagnosis: "Dementia with Lewy bodies.",
+    otherDiagnoses: ["Congestive heart failure"],
     baseline: {
       meal_intake: 85,
       mobility_assistance: 1,

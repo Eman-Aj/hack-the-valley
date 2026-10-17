@@ -6,6 +6,7 @@ import { MOCK_MEMORIES, MOCK_OBSERVATIONS } from "../lib/mock-db";
 import { evaluateHealthSignals } from "../lib/signal-engine";
 import { addHandoff, readCareObservations, readHandoffs } from "../lib/care-demo-storage";
 import { readSavedMemories } from "../lib/memory-storage";
+import ResidentClinicalSummary from "./ResidentClinicalSummary";
 import type { CareObservation, InteractionOutcome, MemoryEntry, Resident } from "../lib/types";
 
 const humanDate = (value: string) => new Date(`${value}T12:00:00`).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
@@ -65,6 +66,10 @@ export default function ResidentCareBrief({ resident }: { resident: Resident }) 
   return <>
     <div className="resident-detail-top"><div><Link href={`/caregiver/resident/${resident.id}`} className="back-link">← {resident.preferredName}&apos;s resident detail</Link><div className="page-heading-row"><div><div className="section-kicker">NEXT VISIT HANDOFF · {humanDate(briefDate)}</div><h2>Today&apos;s care brief</h2><p className="lead">A source-linked, resident-specific briefing for the next caregiver.</p></div></div></div><span className="tag tag-verified">FICTIONAL DEMO</span></div>
     <div className="resident-brief-sections">
+      <section className="panel brief-section resident-snapshot-section" aria-labelledby="resident-snapshot-title">
+        <div className="brief-section-heading"><div><div className="section-kicker">QUICK CLINICAL SNAPSHOT</div><h3 id="resident-snapshot-title">Resident overview</h3><p>Fictional sample data for the demo only; verify real clinical details against the resident&apos;s chart.</p></div></div>
+        <ResidentClinicalSummary resident={resident}/>
+      </section>
       <section className="panel brief-section personal-context-section"><div className="brief-section-heading"><span className="brief-section-number">01</span><div><div className="section-kicker">VERIFIED FAMILY RECORDS</div><h3>Personal context</h3><p>Shared only when the family record permits care-team access.</p></div></div>
         {selectedMemory ? <div className="brief-memory-record"><div className="brief-memory-icon" aria-hidden="true">♡</div><div className="brief-memory-copy"><span className="tag tag-verified">VERIFIED</span><h4>{selectedMemory.proposedCaption}</h4><p>{selectedMemory.verifiedFacts.comfortingDetails || selectedMemory.familyStory}</p><div className="brief-record-meta">Source: {selectedMemory.contributorId} · Family memory date: {selectedMemory.eventDate ? humanDate(selectedMemory.eventDate) : "Not specified"}</div><div className="brief-permission">✓ Family granted care-team permission for this memory</div></div></div> : <p className="brief-empty">No verified family memory is currently shared with this care team.</p>}
         <Link href={resident.id === "res_001" ? "/family-memories" : "/caregiver"} className="brief-section-link">{resident.id === "res_001" ? "Open Nancy’s family memory collection →" : "Return to resident dashboard →"}</Link>

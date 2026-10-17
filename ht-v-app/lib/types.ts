@@ -37,6 +37,11 @@ export interface Resident {
   id: string;
   displayName: string;
   preferredName: string;
+  age?: number;
+  gender?: string;
+  pronouns?: string;
+  diagnosis?: string;
+  otherDiagnoses?: string[];
   baseline: {
     meal_intake: number;
     mobility_assistance: number;
