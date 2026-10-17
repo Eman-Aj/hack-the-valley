@@ -1,6 +1,23 @@
 export type SignalType = "meal_intake" | "mobility_assistance" | "sleep_disruption";
+export type ObservationType = SignalType; // Alias so mock-db.ts and signal-engine.ts both work
+
 export type SignalStatus = "needs_review" | "monitor" | "no_pattern_detected" | "insufficient_data";
 export type VerificationStatus = "draft" | "verified";
+
+export type ObservationSourceRole =
+  | "dietary_aide"
+  | "care_aide"
+  | "overnight_staff";
+
+export interface CareObservation {
+  id: string;
+  residentId: string;
+  date: string; // YYYY-MM-DD
+  type: ObservationType;
+  value: number;
+  sourceRole: ObservationSourceRole;
+  sourceNote: string;
+}
 
 export interface Resident {
   id: string;
@@ -29,7 +46,8 @@ export interface MemoryEntry {
   residentId: string;
   createdAt: string;
   eventDate: string;
-  image?: string; 
+  image?: string;
+  imageUrl?: string; // Added for the new mock-db.ts photos
   familyStory: string;
   proposedCaption: string;
   verifiedFacts: VerifiedMemoryFacts;

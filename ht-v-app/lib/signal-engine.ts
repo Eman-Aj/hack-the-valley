@@ -1,63 +1,147 @@
-import { Resident, SignalStatus, SignalType } from "./types";
+import type {
+  Resident,
+  CareObservation,
+  ObservationType,
+  SignalStatus,
+} from "./types";
 
-export interface CareObservation {
-  date: string;
-  type: SignalType;
-  value: number; 
+// Re-export CareObservation so any existing imports don't break
+export type { CareObservation };
+
+const RECENT_WINDOW_DATES = ["2026-10-14", "2026-10-15", "2026-10-16"];
+const MIN_OBSERVATIONS_IN_WINDOW = 2;
+
+export interface DomainEvaluation {
+  status: SignalStatus;
+  recentValues: number[];
+  baselineValue: number;
+  explanation: string;
 }
 
-/**
- * DETERMINISTIC RULES ENGINE
- * Evaluates recent clinical observations against a resident's historical baseline.
- * 
- * Rules:
- * - Meal Intake: Flags if average drops 20% below baseline.
- * - Sleep: Flags if disruptions increase 1.5x over baseline.
- * - Mobility: Flags if assistance needed increases by more than 1 point.
- */
+export interface HealthSignalSummary {
+  residentId: string;
+  overallStatus: SignalStatus;
+  windowDates: string[];
+  meal_intake: SignalStatus;
+  mobility_assistance: SignalStatus;
+  sleep_disruption: SignalStatus;
+  details: Record<ObservationType, DomainEvaluation>;
+}
+
+function isConcerningObservation(
+  type: ObservationType,
+  value: number,
+  baseline: number
+): boolean {
+  switch (type) {
+    case "meal_intake":
+      // Decline of 15% or more below resident's personal baseline
+      return baseline - value >= 15;
+    case "mobility_assistance":
+      // Increase of 1+ level above baseline
+      return value - baseline >= 1;
+    case "sleep_disruption":
+      // Increase of 1+ level above baseline
+      return value - baseline >= 1;
+  }
+}
+
+function evaluateDomain(
+  type: ObservationType,
+  baseline: number,
+  recentObs: CareObservation[]
+): DomainEvaluation {
+  const recentValues = recentObs.map((o) => o.value);
+
+  if (recentObs.length < MIN_OBSERVATIONS_IN_WINDOW) {
+    return {
+      status: "insufficient_data",
+      recentValues,
+      baselineValue: baseline,
+      explanation: `Only ${recentObs.length} observation(s) recorded in the recent 3-day window; insufficient evidence to assess pattern.`,
+    };
+  }
+
+  const concerningCount = recentObs.filter((o) =>
+    isConcerningObservation(type, o.value, baseline)
+  ).length;
+
+  // Require at least 2 concerning observations within the 3-day window for a sustained pattern
+  if (concerningCount >= 2) {
+    return {
+      status: "needs_review",
+      recentValues,
+      baselineValue: baseline,
+      explanation: `Sustained change from baseline (${baseline}) across ${concerningCount} of the last ${recentObs.length} days (${recentValues.join(", ")}).`,
+    };
+  }
+
+  return {
+    status: "no_pattern_detected",
+    recentValues,
+    baselineValue: baseline,
+    explanation: `Recent 3-day observations (${recentValues.join(", ")}) remain near baseline (${baseline}).`,
+  };
+}
+
 export function evaluateHealthSignals(
   resident: Resident,
-  recentObservations: CareObservation[]
-): Record<SignalType, SignalStatus> {
-  
-  // Initialize default statuses
-  const results: Record<SignalType, SignalStatus> = {
-    meal_intake: "insufficient_data",
-    mobility_assistance: "insufficient_data",
-    sleep_disruption: "insufficient_data",
+  allObservations: CareObservation[]
+): HealthSignalSummary {
+  const residentRecentObs = allObservations.filter(
+    (o) =>
+      o.residentId === resident.id && RECENT_WINDOW_DATES.includes(o.date)
+  );
+
+  const domains: ObservationType[] = [
+    "meal_intake",
+    "mobility_assistance",
+    "sleep_disruption",
+  ];
+
+  const details = {} as Record<ObservationType, DomainEvaluation>;
+
+  for (const type of domains) {
+    const domainObs = residentRecentObs
+      .filter((o) => o.type === type)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    details[type] = evaluateDomain(type, resident.baseline[type], domainObs);
+  }
+
+  const statuses = domains.map((d) => details[d].status);
+  const flaggedDomains = statuses.filter((s) => s === "needs_review").length;
+  const insufficientDomains = statuses.filter(
+    (s) => s === "insufficient_data"
+  ).length;
+
+  let overallStatus: SignalStatus = "no_pattern_detected";
+
+  if (insufficientDomains > 0 && flaggedDomains === 0) {
+    overallStatus = "insufficient_data";
+  } else if (flaggedDomains >= 2) {
+    overallStatus = "needs_review";
+  } else if (flaggedDomains === 1) {
+    overallStatus = "monitor";
+  }
+
+  return {
+    residentId: resident.id,
+    overallStatus,
+    windowDates: RECENT_WINDOW_DATES,
+    meal_intake:
+      flaggedDomains === 1 && details.meal_intake.status === "needs_review"
+        ? "monitor"
+        : details.meal_intake.status,
+    mobility_assistance:
+      flaggedDomains === 1 &&
+      details.mobility_assistance.status === "needs_review"
+        ? "monitor"
+        : details.mobility_assistance.status,
+    sleep_disruption:
+      flaggedDomains === 1 && details.sleep_disruption.status === "needs_review"
+        ? "monitor"
+        : details.sleep_disruption.status,
+    details,
   };
-
-  // Helper to calculate the recent average for a specific signal
-  const getAverage = (type: SignalType) => {
-    const obs = recentObservations.filter(o => o.type === type);
-    if (obs.length === 0) return null;
-    const sum = obs.reduce((acc, curr) => acc + curr.value, 0);
-    return sum / obs.length;
-  };
-
-  // 1. Evaluate Meal Intake
-  const avgMeals = getAverage("meal_intake");
-  if (avgMeals !== null) {
-    results.meal_intake = avgMeals < resident.baseline.meal_intake * 0.8 
-      ? "needs_review" 
-      : "no_pattern_detected";
-  }
-
-  // 2. Evaluate Sleep Disruption
-  const avgSleep = getAverage("sleep_disruption");
-  if (avgSleep !== null) {
-    results.sleep_disruption = avgSleep > resident.baseline.sleep_disruption * 1.5 
-      ? "needs_review" 
-      : "no_pattern_detected";
-  }
-
-  // 3. Evaluate Mobility
-  const avgMobility = getAverage("mobility_assistance");
-  if (avgMobility !== null) {
-    results.mobility_assistance = avgMobility > resident.baseline.mobility_assistance + 1 
-      ? "needs_review" 
-      : "no_pattern_detected";
-  }
-
-  return results;
 }
