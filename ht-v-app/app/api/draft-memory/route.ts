@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { GoogleGenAI, Type } from "@google/genai";
 import { DraftMemoryInputSchema, DraftMemoryOutputSchema } from "../../../lib/validation";
+import { generateGeminiJson } from "../../../lib/gemini-rest";
 
 export async function POST(req: Request) {
   try {
@@ -15,62 +15,49 @@ export async function POST(req: Request) {
     const { familyStory, contributorName, eventDateHint, imageBase64 } = parsed.data;
 
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
+      return NextResponse.json({ error: "AI drafting is not configured yet. Add GEMINI_API_KEY to the server environment, or save this memory with your own reviewed details." }, { status: 503 });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-
-    // 2. Build the base text prompt
-    let contents: any[] = [
-      `You are an AI assistant helping a family member (${contributorName}) draft a memory for a senior care resident.
-      Extract the details from their note: "${familyStory}"
-      Event Date Hint: ${eventDateHint || "Not provided"}`
+    // Photos can help describe visible context, but must never establish identity.
+    const parts: ({ text: string } | { inline_data: { data: string; mime_type: string } })[] = [
+      { text:
+      `You help ${contributorName} prepare a family memory for review. Draft a concise, warm caption using this family-provided story: "${familyStory}".
+Event date provided by family: ${eventDateHint || "Not provided"}.
+Treat the family story and date as the only sources for names, identities, relationships, dates, and events. Never identify anyone from the image or infer their relationship, age, location, emotion, or personal history. The image may only support cautious, generic visible context (for example, flowers or a table); if uncertain, leave it blank and add a confirmation note. Keep every output as a proposal for a family member to review.`
+      },
     ];
 
-    // 3. Inject Vision AI if an image was uploaded
+    // Accept a data URL from the browser and preserve its actual supported image MIME type.
     if (imageBase64) {
-      // Clean the string just in case the frontend sends the data URI prefix
-      const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-      
-      contents.push({
-        inlineData: {
-          data: cleanBase64,
-          mimeType: "image/jpeg", 
+      const dataUrl = imageBase64.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/i);
+      const rawBase64 = dataUrl ? dataUrl[2].replace(/\s/g, "") : imageBase64;
+      const mimeType = dataUrl ? dataUrl[1].toLowerCase() : "image/jpeg";
+      if (!/^[A-Za-z0-9+/]+={0,2}$/.test(rawBase64)) {
+        return NextResponse.json({ error: "The uploaded image could not be read. Please choose a JPEG, PNG, or WebP image." }, { status: 400 });
+      }
+      parts.push({
+        inline_data: {
+          data: rawBase64,
+          mime_type: mimeType,
         },
       });
-      
-      contents[0] += "\n\nAN IMAGE WAS PROVIDED. Look closely at the photo to enrich the 'comfortingDetails' and 'locationOrContext', and identify the mood or activities happening in the background.";
     }
 
-    // 4. Force strict JSON return
-    const response = await ai.models.generateContent({
-      model,
-      contents: contents,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            proposedCaption: { type: Type.STRING },
-            suggestedEventDate: { type: Type.STRING },
-            people: { 
-              type: Type.ARRAY, 
-              items: { 
-                type: Type.OBJECT, 
-                properties: { name: { type: Type.STRING }, relationship: { type: Type.STRING } }
-              } 
-            },
-            locationOrContext: { type: Type.STRING },
-            comfortingDetails: { type: Type.STRING },
-            needsConfirmationNotes: { type: Type.ARRAY, items: { type: Type.STRING } },
-          },
-          required: ["proposedCaption", "suggestedEventDate", "people", "locationOrContext", "comfortingDetails", "needsConfirmationNotes"],
+    const rawJson = JSON.parse(await generateGeminiJson(parts, {
+      type: "OBJECT",
+      properties: {
+        proposedCaption: { type: "STRING" },
+        suggestedEventDate: { type: "STRING" },
+        people: {
+          type: "ARRAY",
+          items: { type: "OBJECT", properties: { name: { type: "STRING" }, relationship: { type: "STRING" } }, required: ["name", "relationship"] },
         },
+        locationOrContext: { type: "STRING" },
+        comfortingDetails: { type: "STRING" },
+        needsConfirmationNotes: { type: "ARRAY", items: { type: "STRING" } },
       },
-    });
-
-    const rawJson = JSON.parse(response.text || "{}");
+      required: ["proposedCaption", "suggestedEventDate", "people", "locationOrContext", "comfortingDetails", "needsConfirmationNotes"],
+    }));
     const validated = DraftMemoryOutputSchema.parse(rawJson);
 
     return NextResponse.json({ draft: validated, source: imageBase64 ? "gemini_vision" : "gemini_text" });
