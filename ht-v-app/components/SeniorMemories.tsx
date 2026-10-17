@@ -87,7 +87,6 @@ export default function SeniorMemories() {
           const detailProgress = contentProgress > 0.92 ? 1 : contentProgress;
           content?.style.setProperty("opacity", `${Math.max(0, Math.min(1, (detailProgress - 0.08) / 0.72))}`);
           content?.style.setProperty("transform", `translateY(${Math.round((1 - detailProgress) * 12)}px)`);
-          content?.style.setProperty("clip-path", `inset(${Math.round((1 - detailProgress) * 100)}% 0 0 0 round 19px)`);
           card.classList.toggle("is-centered", progress >= 0.62);
         }
       });
