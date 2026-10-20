@@ -110,6 +110,7 @@ export interface MemoryEntry {
   eventDate: string;
   image?: string;
   imageUrl?: string; // Added for the new mock-db.ts photos
+  isDemo?: boolean;
   familyStory: string;
   proposedCaption: string;
   verifiedFacts: VerifiedMemoryFacts;

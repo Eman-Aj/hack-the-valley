@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { MemoryEntry } from "../lib/types";
+import { MOCK_MEMORIES } from "../lib/mock-db";
 import { readSavedMemories } from "../lib/memory-storage";
 import { recordQuestionActivity } from "../lib/question-activity";
 import MemoryImageViewer from "./MemoryImageViewer";
@@ -20,29 +21,16 @@ type Memory = {
   verifiedMemory?: MemoryEntry;
 };
 
-const memories: Memory[] = [
-  {
-    title: "Meeting baby Theo",
-    date: "June 2024",
-    story: "This is your grandson Theo. You met him when he was just a few weeks old.",
-    art: "senior-art-theo",
-    questions: ["Who is this?", "Tell me about this day"],
-  },
-  {
-    title: "Sunday dinner together",
-    date: "October 2023",
-    story: "Your family gathered for Sunday dinner. You always loved having everyone around the table.",
-    art: "senior-art-dinner",
-    questions: ["Who is at the table?", "What did I like to cook?"],
-  },
-  {
-    title: "A summer day at the lake",
-    date: "August 2022",
-    story: "A warm summer afternoon spent by the water with your family.",
-    art: "senior-art-lake",
-    questions: ["Where am I?", "Who came with me?"],
-  },
-];
+const memories: Memory[] = MOCK_MEMORIES.filter((entry) => entry.residentId === "res_001" && entry.sharingPermissions.visibleInAskMyStory).map((entry) => ({
+  id: entry.id,
+  title: entry.proposedCaption,
+  date: entry.isDemo ? "Sample memory · Date not provided" : entry.eventDate || "A family memory",
+  story: entry.verifiedFacts.comfortingDetails || entry.familyStory,
+  art: "",
+  image: entry.imageUrl,
+  questions: ["What can you tell me about this picture?", "Who is pictured?", "Tell me about this moment"],
+  verifiedMemory: entry,
+}));
 
 export default function SeniorMemories() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
@@ -53,7 +41,7 @@ export default function SeniorMemories() {
   useEffect(() => {
     const refresh = () => setFamilyMemories(readSavedMemories().filter((entry) => entry.verificationStatus === "verified" && entry.sharingPermissions.visibleInAskMyStory).map((entry) => ({
       id: entry.id, title: entry.proposedCaption, date: entry.eventDate || "A family memory",
-      story: entry.verifiedFacts.comfortingDetails || entry.familyStory, art: "", image: entry.image,
+      story: entry.verifiedFacts.comfortingDetails || entry.familyStory, art: "", image: entry.image || entry.imageUrl,
       questions: ["Who is this?", "Tell me about this day"], verifiedMemory: entry,
     })));
     refresh();
@@ -130,7 +118,7 @@ export default function SeniorMemories() {
     <div className="senior-layout">
       <div className="senior-memory-list">
         {allMemories.map((memory, index) => <article className={`senior-memory-card ${activeMemory?.title === memory.title ? "is-active" : ""}`} key={memory.id ?? memory.title} tabIndex={0} data-memory-index={index}>
-          {/* A large picture placeholder leaves room for the real approved family photo. */}
+          {/* Built-in sample photos and family-approved uploads use the same viewer. */}
           <div className="senior-memory-visual">
             {memory.image ? <MemoryImageViewer src={memory.image} alt={memory.title} title={memory.title} imageClassName="senior-memory-image senior-memory-upload" variant="senior"/> : <div className={`senior-memory-image ${memory.art}`} role="img" aria-label={`Photo placeholder: ${memory.title}`}>
               <span className="senior-sun"/><span className="senior-hill senior-hill-one"/><span className="senior-hill senior-hill-two"/>

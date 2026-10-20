@@ -195,6 +195,38 @@ export const MOCK_RESIDENTS: Resident[] = [
 
 export const MOCK_MEMORIES: MemoryEntry[] = [
   {
+    id: "mem_demo_wedding", residentId: "res_001", createdAt: "2026-10-20T12:00:00Z", eventDate: "",
+    imageUrl: "/memories/daughter-wedding.jpg", isDemo: true,
+    familyStory: "Sample memory: a mother stands with a family member in a wedding dress and another loved one. The photo suggests a joyful wedding portrait, but names, relationships, and the date have not been provided.",
+    proposedCaption: "A special wedding day",
+    verifiedFacts: { people: [], eventDate: "", locationOrContext: "Wedding portrait; names and relationships not provided.", comfortingDetails: "A warm family portrait with the bride and two loved ones close together." },
+    verificationStatus: "verified", contributorId: "Sample memory", sharingPermissions: { visibleInAskMyStory: true, includeInCareBrief: false },
+  },
+  {
+    id: "mem_demo_family", residentId: "res_001", createdAt: "2026-10-20T12:00:00Z", eventDate: "",
+    imageUrl: "/memories/family-portrait.webp", isDemo: true,
+    familyStory: "Sample memory: several generations of a family are gathered indoors around an older woman. The people are not identified, and no date or occasion was supplied.",
+    proposedCaption: "Together with the family",
+    verifiedFacts: { people: [], eventDate: "", locationOrContext: "Indoor family portrait; names and occasion not provided.", comfortingDetails: "A cheerful group portrait with family members gathered close together." },
+    verificationStatus: "verified", contributorId: "Sample memory", sharingPermissions: { visibleInAskMyStory: true, includeInCareBrief: false },
+  },
+  {
+    id: "mem_demo_friends", residentId: "res_001", createdAt: "2026-10-20T12:00:00Z", eventDate: "",
+    imageUrl: "/memories/friends-reunion.jpg", isDemo: true,
+    familyStory: "Sample memory: a group of older friends are outdoors together, smiling and playfully lifting their legs for the camera. Their names and the occasion are unknown.",
+    proposedCaption: "A joyful day with friends",
+    verifiedFacts: { people: [], eventDate: "", locationOrContext: "Outdoor gathering with friends; names and date not provided.", comfortingDetails: "Friends share a lively, playful moment together outside." },
+    verificationStatus: "verified", contributorId: "Sample memory", sharingPermissions: { visibleInAskMyStory: true, includeInCareBrief: false },
+  },
+  {
+    id: "mem_demo_tennis", residentId: "res_001", createdAt: "2026-10-20T12:00:00Z", eventDate: "",
+    imageUrl: "/memories/tennis-day.webp", isDemo: true,
+    familyStory: "Sample memory: an older woman holds a tennis racket on an outdoor court, ready to play. Her name, playing history, and the date are not known from the photo.",
+    proposedCaption: "Ready for a game of tennis",
+    verifiedFacts: { people: [], eventDate: "", locationOrContext: "Outdoor tennis court; name and date not provided.", comfortingDetails: "A moment on the court with a racket and tennis ball close at hand." },
+    verificationStatus: "verified", contributorId: "Sample memory", sharingPermissions: { visibleInAskMyStory: true, includeInCareBrief: false },
+  },
+  {
     id: "mem_101",
     residentId: "res_001",
     createdAt: "2026-10-16T18:30:00Z",

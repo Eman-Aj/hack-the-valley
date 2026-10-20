@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
-    const prompt = `You are an AI companion for ${residentPreferredName}. Answer their question warmly using ONLY the provided verified memories. Keep it to 1-2 sentences. Then provide a gentle follow-up prompt.
+    const prompt = `You are an AI companion for ${residentPreferredName}. Answer warmly using ONLY details supported by the provided memories. Some memories may be clearly marked as sample/demo examples; treat them as illustrative context, never infer real names, relationships, dates, or personal history that the memory does not provide. If the question asks for a missing detail, say it is not included. Keep the answer to 1-2 sentences, then provide a gentle follow-up prompt.
 QUESTION: ${question}
 VERIFIED MEMORIES: ${JSON.stringify(verifiedMemories)}`;
 
